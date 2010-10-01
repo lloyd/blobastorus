@@ -1,27 +1,69 @@
 <script type="text/javascript" src="jschannel-min.js"></script>
 <script type="text/javascript">
 
+// wrap browser diffs
+if (!window.XMLHttpRequest) {
+    window.XMLHttpRequest = function () {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+    }
+}
+XHR = window.XMLHttpRequest;
+
+// a function to clean up origin
+function cleanOrigin(o) {
+    if (o === null) return 'local';
+    return o.replace(/^[a-z]+:\/\//, "");
+}
+
 var chan = Channel.build({window: window.parent, origin: "*", scope: "blobastorus"});
 
-// XXX: fixme: hacked up api using localstorage for now!  this would migrate to using
-// an api served from blobastorus behind twitter auth.
-var sto = window.localStorage;
-
 chan.bind("get", function(trans, args) {
+    // we will be async
     trans.delayReturn(true);
-    setTimeout(function() {
-        console.log("yeah I got it!");
-        trans.complete(sto.getItem("key"));
-    }, 0);
+
+    var origin = cleanOrigin(trans.origin);
+    var url = "/api/get/" + origin + "/" + "XXXX";
+
+    var r = new XHR();
+    r.open('GET', url, true);
+
+    r.onreadystatechange = function (e) {  
+        if (r.readyState == 4) {  
+            e.preventDefault();
+            if (r.status == 200) {
+                trans.complete(JSON.parse(r.responseText));
+            } else if (r.status == 404) {
+                trans.complete(null);
+            } else {
+                trans.error("networkError", "Error loading page\n");
+            }
+        }
+    };
+    r.send(null);
 });
 
 chan.bind("set", function(trans, args) {
+    // we will be async
     trans.delayReturn(true);
-    setTimeout(function() {
-        sto.setItem("key", args);
-        console.log("yeah I set it!");
-        trans.complete(true);
-    }, 0);
+
+    var origin = cleanOrigin(trans.origin);
+    var url = "/api/set/" + origin + "/" + "XXXX";
+
+    var r = new XHR();
+    r.open('POST', url, true);
+    r.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+    r.onreadystatechange = function (e) {  
+        if (r.readyState == 4) {  
+            e.preventDefault();
+            if (r.status == 200) {
+                trans.complete(true);
+            } else {
+                trans.complete(false);
+            }
+        }
+    };
+    r.send("data=" + JSON.stringify(args));
 });
 
 </script>
