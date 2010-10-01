@@ -43,7 +43,7 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
 
     // Append iframe to the dom and load up target conduit inside
     doc.body.appendChild(this.iframe);
-    this.iframe.src = "../src/conduit/index.html"; // XXX: fixme.  will become "http://blobastor.us/conduit"
+    this.iframe.src = "http://localhost:3000/conduit/index.html"; // XXX: fixme.  will become "http://blobastor.us/conduit"
 
     var conduit = this;
     // now create a Channel
