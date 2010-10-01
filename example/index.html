@@ -12,20 +12,22 @@
   <button id="save">save</button>
 
 </body>
-<script type="text/javascript" src="../src/api.js"></script>
+<script type="text/javascript" src="http://localhost:3000/api.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-  $("#save").click(function() {
-    Blobastorus.set($.trim($("#stored").val()), function(v) {
-      
-    });
-  });
+    $("#save").click(function() {
+        Blobastorus.set($.trim($("#stored").val()), function(v) {
 
-  Blobastorus.get(function(v) {
-    if (typeof v === 'string') {
-      $("#stored").val(v);
-    }
-  });
+        });
+    });
+
+    Blobastorus.get(function(v) {
+        if (v === null) v = "";
+        if (typeof v === 'string') {
+
+            $("#stored").val(v);
+        }
+    });
 });
 </script>
 </html>
