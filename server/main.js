@@ -16,15 +16,16 @@ app.configure(function() {
 });
 
 // API to get a blob
-app.get(/^\/api\/get\/([0-9a-zA-Z.]+)\/([^\/]+)$/, function(req, res){
+app.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
     // req.params[0] is domain
+    var domain = req.params[0];
     // req.params[1] is twitter username
 
     // domain is a collection name, open the collection
     db.collection(req.params[0], function(err, col) {
         col.find({user:req.params[1]}, {limit:1}, function(err, cur) {
             cur.nextObject(function(e,doc) {
-                res.send((doc && doc.data) ? doc.data : 404);
+                res.send((doc && doc.data) ? JSON.stringify(doc.data) : 404);
             });
         });
     });
@@ -32,7 +33,7 @@ app.get(/^\/api\/get\/([0-9a-zA-Z.]+)\/([^\/]+)$/, function(req, res){
 
 // API to set a blob
 // XXX: this must be HTTPS
-app.post(/^\/api\/set\/([0-9a-zA-Z.]+)\/([^\/]+)$/, function(req, res){
+app.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
     // req.params[0] is domain
     // req.params[1] is twitter username
     // body contains:
@@ -57,14 +58,14 @@ app.post(/^\/api\/set\/([0-9a-zA-Z.]+)\/([^\/]+)$/, function(req, res){
 
 // API to list users who have stored blobs for a given domain
 // XXX: no, this wouldn't really scale.
-app.get(/^\/api\/list\/([0-9a-zA-Z.]+)$/, function(req, res){
+app.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
     // req.params[0] is domain
+    var domain = req.params[0];
 
-    db.collection(req.params[0], function(err, col) {
+    db.collection(domain, function(err, col) {
         col.find({}, {fields:['user']}, function(err, cur) {
             var users = [];
             cur.each(function(e,doc) {
-                console.log(users);
                 if (!doc) {
                     res.send(users);
                 } else if (doc.user) {
