@@ -1,3 +1,5 @@
+var oauth = require('node-oauth');
+var creds = require('./creds.js');
 var mongo = require('mongodb');
 
 // establish a connection to mongodb
