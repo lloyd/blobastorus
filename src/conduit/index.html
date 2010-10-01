@@ -1,0 +1,27 @@
+<script type="text/javascript" src="jschannel-min.js"></script>
+<script type="text/javascript">
+
+var chan = Channel.build({window: window.parent, origin: "*", scope: "blobastorus"});
+
+// XXX: fixme: hacked up api using localstorage for now!  this would migrate to using
+// an api served from blobastorus behind twitter auth.
+var sto = window.localStorage;
+
+chan.bind("get", function(trans, args) {
+    trans.delayReturn(true);
+    setTimeout(function() {
+        console.log("yeah I got it!");
+        trans.complete(sto.getItem("key"));
+    }, 0);
+});
+
+chan.bind("set", function(trans, args) {
+    trans.delayReturn(true);
+    setTimeout(function() {
+        sto.setItem("key", args);
+        console.log("yeah I set it!");
+        trans.complete(true);
+    }, 0);
+});
+
+</script>
