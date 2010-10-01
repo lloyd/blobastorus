@@ -1,0 +1,1 @@
+* use api.js in conduit/index.html too, so that the browse can effectively cache jschannel, and browser doesn't have to fetch twice.
