@@ -60,8 +60,15 @@ app.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
 
 // Begin twitter authentication (application redirects user here)
 app.get("/auth/", function (req, res) {
+    var kickback = req.query.kickback;
+
+    if (!kickback) {
+        res.send("I need a valid kickback url to continue (?kickback=XXX).", 400);
+        return;
+    }
+
     // the user enters /auth/ when sent by the application wishing to use blobastor.us
-    twitauth.startOAuth(function(err, url) {
+    twitauth.startOAuth(kickback, function(err, url) {
         if(err) res.send(err, 503);
         else    res.redirect(url);
     });
@@ -79,13 +86,15 @@ app.get("/auth/callback", function (req, res) {
         return;
     }
 
-    twitauth.finishOAuth(oauth_token, oauth_verifier, function(err, uname, secret) {
+    twitauth.finishOAuth(oauth_token, oauth_verifier, function(err, uname, secret, kickback) {
         if(err) res.send(err, 503);
         else {
             // XXX: at this point we should:
             // * store the user's twitter username and this random secret under local storage for blobastor.us
             // * send the user back to the application's kickback url.
-            res.send("hi, " + uname);
+
+            // XXX: as a mockup for now it's an http redirect
+            res.redirect(kickback);
         }
     });
 });

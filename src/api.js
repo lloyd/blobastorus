@@ -70,9 +70,10 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
                 error: function(e) { alert("unexpected error: " + JSON.stringify(e)); }
             });
         },
-        isLoggedIn: function(cb) {
+        isLoggedIn: function(kickback, cb) {
             chan.call({
                 method: "isLoggedIn",
+                params: kickback,
                 success: function(v) {
                     cb(v);
                 },

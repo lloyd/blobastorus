@@ -47,3 +47,8 @@ exports.list = function(domain,cb) {
         });
     });
 };
+
+exports.saveSecret = function(user, secret) {
+    // XXX: write me!
+    console.log("should save " + user + " - " + secret);
+};

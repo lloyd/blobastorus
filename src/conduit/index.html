@@ -75,7 +75,7 @@ chan.bind("isLoggedIn", function(trans, args) {
         return true;
     } else {
         // XXX: http*S*
-        return "http://localhost:3000/auth/";
+        return "http://localhost:3000/auth/?kickback=" + args;
     }
 });
 

@@ -1,7 +1,7 @@
 // an abstraction to hide as many details as possible around using twitter for
 // authentication and identity.
-
 var oauth = require('node-oauth');
+var db = require('./db.js');
 
 // creds must be created by the installer, it should export .key and .secret which are
 // oauth consumer creds
@@ -15,11 +15,13 @@ oa = new OAuth("https://twitter.com/oauth/request_token",
                creds.key, creds.secret,
                "1.0A", "http://localhost:3000/auth/callback", "HMAC-SHA1");
 
-// hack global for now!  we need storage for continuity from /auth/ call to
+// hack globals for now!  we need storage for continuity from /auth/ call to
 // redirection back to application
 g_oauth_token_secret = null;
+g_kickback = null;
 
-exports.startOAuth = function(cb) {
+exports.startOAuth = function(kickback, cb) {
+    g_kickback = kickback;
     oa.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret, results){
         if (error) {
             cb("Problem acquiring request token from twitter: " + JSON.stringify(error), null);
@@ -34,6 +36,14 @@ exports.startOAuth = function(cb) {
 };
 
 exports.finishOAuth = function(token, verifier, cb) {
+    // XXX: this is not particularly good.
+    function generateSecret() {
+        var text = "";
+        var alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        for(var i=0; i < 64; i++) text += alpha.charAt(Math.floor(Math.random() * alpha.length));
+        return text;
+    }
+
     oa.getOAuthAccessToken(
         token, g_oauth_token_secret, verifier,
         function(error, access_token, access_token_secret, results)
@@ -57,13 +67,11 @@ exports.finishOAuth = function(token, verifier, cb) {
 
                 // now we're pretty sure we're who we're talking to! 
                 var tuser = data.screen_name;
+                var sekret = generateSecret();
 
-                // XXX: at this point we should (?):
-                // * generate a random secret
-                // * store in our mongodb instance an association between the user's twitter id and this
-                //   new random secret (NOTE: there's going to likely frequently be multiple secrets per user)
-
-                cb(null, tuser, "XXX: random sekcret");
+                // store in our db an association between twitter id new secret
+                db.saveSecret(tuser, sekret);
+                cb(null, tuser, sekret, g_kickback);
             });
         });
 };

@@ -27,7 +27,7 @@ $(document).ready(function() {
     $(".logged-in").hide();
     $(".logged-out").hide();
 
-    Blobastorus.isLoggedIn(function(r) {
+    Blobastorus.isLoggedIn("http://localhost:3000/example/index.html", function(r) {
         if (r === true) {
             $(".logged-in").show();
         } else {
