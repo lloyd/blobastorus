@@ -24,7 +24,10 @@ app.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
 });
 
 // API to set a blob
-// XXX: this must be HTTPS
+// XXX: the request of this call includes a secret which must be
+// protected from eavsedropping!  Add HTTPS here.
+// XXX: oh yeah, alternatively the client could sign their request
+// with the secret and we could reduce the amount of HTTPSery going on.
 app.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
     // req.params[0] is domain
     // req.params[1] is twitter username
@@ -55,8 +58,8 @@ app.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
     });
 });
 
-// twiter authentication related functions
-app.get("/auth/", function (req, res) { 
+// Begin twitter authentication (application redirects user here)
+app.get("/auth/", function (req, res) {
     // the user enters /auth/ when sent by the application wishing to use blobastor.us
     twitauth.startOAuth(function(err, url) {
         if(err) res.send(err, 503);
@@ -64,8 +67,10 @@ app.get("/auth/", function (req, res) {
     });
 });
 
-// twiter authentication related functions
-app.get("/auth/callback", function (req, res) { 
+// Complete twitter authentication (twitter redirects user here)
+// XXX: The response of this call sends a secret down to the user
+// which must be protected from eavsedropping! Add HTTPS here.
+app.get("/auth/callback", function (req, res) {
     var oauth_token = req.query.oauth_token;
     var oauth_verifier = req.query.oauth_verifier;
 
