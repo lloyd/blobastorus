@@ -6,15 +6,40 @@
 <body>
   <p>This page stores data for you in the cloud.</p>
 
-  <p>Here's what you've got stored:</p>
 
-  <textarea id="stored">...</textarea><br>
-  <button id="save">save</button>
+  <div id="switch">
+    <div class="logged-out">
+    To use this application: <br/>
+    <div id="signInWithTwitter"><img src="sign-in-with-twitter-d.png" /></div>
+    </div>
+    <div class="logged-in">
+      <p>Here's what you've got stored:</p>
+
+      <textarea id="stored">...</textarea><br>
+      <button id="save">save</button>
+    </div>
+  </div>
 
 </body>
 <script type="text/javascript" src="http://localhost:3000/api.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
+    $(".logged-in").hide();
+    $(".logged-out").hide();
+
+    Blobastorus.isLoggedIn(function(r) {
+        if (r === true) {
+            $(".logged-in").show();
+        } else {
+            $(".logged-out").show();
+            console.log("you're logged out");
+            $("#signInWithTwitter").click(function() {
+                console.log("you clicked!");
+                document.location = r;
+            });
+        }
+    });
+
     $("#save").click(function() {
         Blobastorus.set($.trim($("#stored").val()), function(v) {
 

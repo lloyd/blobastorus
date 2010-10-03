@@ -66,4 +66,17 @@ chan.bind("set", function(trans, args) {
     r.send("data=" + JSON.stringify(args));
 });
 
+var sto = window.localStorage;
+
+chan.bind("isLoggedIn", function(trans, args) {
+    // being logged in signifies that the users twitter username and secret
+    // is set in local storage.
+    if (sto.getItem("twitter_uname") && sto.getItem("blobastorus_sekret")) {
+        return true;
+    } else {
+        // XXX: http*S*
+        return "http://localhost:3000/auth/";
+    }
+});
+
 </script>

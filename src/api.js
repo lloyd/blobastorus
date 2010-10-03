@@ -69,6 +69,16 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
                 success: function(v) { cb(v); },
                 error: function(e) { alert("unexpected error: " + JSON.stringify(e)); }
             });
+        },
+        isLoggedIn: function(cb) {
+            chan.call({
+                method: "isLoggedIn",
+                success: function(v) {
+                    cb(v);
+                },
+                error: function(e) { alert("unexpected error: " + JSON.stringify(e)); }
+            });
         }
+
     };
 })();
