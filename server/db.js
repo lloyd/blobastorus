@@ -48,7 +48,21 @@ exports.list = function(domain,cb) {
     });
 };
 
-exports.saveSecret = function(user, secret) {
-    // XXX: write me!
-    console.log("should save " + user + " - " + secret);
+exports.getUserSecrets = function(user, cb) {
+    db.collection("users", function(err, col) {
+        col.find({user:user}, {limit:1}, function(err, cur) {
+            cur.nextObject(function(e,doc) {
+                cb((doc && doc.secrets) ? doc.secrets : null);
+            });
+        });
+    });
+};
+
+exports.setUserSecrets = function(user, secrets, cb) {
+    db.collection("users", function(err, col) {
+        col.findAndModify({user:user}, [], {'$set':{secrets:secrets}}, {upsert:true}, function(err, cur) {
+            // XXX: error handling?
+            if (typeof cb === 'function') cb();
+        });
+    });
 };

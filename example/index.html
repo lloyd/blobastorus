@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title> The Simplest possible blobastor.us example </title>
+  <title> A Simple blobastor.us example </title>
   <script type="text/javascript" src="jquery-min.js"></script>
 </head>
 <body>
@@ -44,8 +44,13 @@ $(document).ready(function() {
     }
 
     $("#save").click(function() {
+        $("#stored").css("opacity", .10);
         Blobastorus.set($.trim($("#stored").val()), function(err, v) {
-            if (err === "needsAuth") checkLoginState();
+            if (err === "needsAuth") {
+                checkLoginState();
+            } else {
+                $("#stored").animate({ opacity: 1.0 }, 800);
+            }
         });
     });
 
