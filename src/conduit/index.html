@@ -27,8 +27,8 @@ chan.bind("get", function(trans, args) {
     var r = new XHR();
     r.open('GET', url, true);
 
-    r.onreadystatechange = function (e) {  
-        if (r.readyState == 4) {  
+    r.onreadystatechange = function (e) { 
+        if (r.readyState == 4) {
             e.preventDefault();
             if (r.status == 200) {
                 trans.complete(JSON.parse(r.responseText));
@@ -53,8 +53,8 @@ chan.bind("set", function(trans, args) {
     r.open('POST', url, true);
     r.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-    r.onreadystatechange = function (e) {  
-        if (r.readyState == 4) {  
+    r.onreadystatechange = function (e) {
+        if (r.readyState == 4) {
             e.preventDefault();
             if (r.status == 200) {
                 trans.complete(true);
@@ -66,12 +66,22 @@ chan.bind("set", function(trans, args) {
     r.send("data=" + JSON.stringify(args));
 });
 
-var sto = window.localStorage;
-
 chan.bind("isLoggedIn", function(trans, args) {
     // being logged in signifies that the users twitter username and secret
     // is set in local storage.
-    if (sto.getItem("twitter_uname") && sto.getItem("blobastorus_sekret")) {
+    var sto = window.localStorage;
+
+    // Expire secrets after 2 weeks (?).
+    var ts = sto.getItem("ts")
+    if (typeof ts === 'string') {
+        var ts = new Date(sto.getItem("ts"));
+        if (((new Date() - ts) / 1000.0) > (14 * 24 * 60 * 60)) sto.clear();
+    }
+
+    var user = sto.getItem("user");
+    var secret = sto.getItem("secret");
+    
+    if (user && secret) {
         return true;
     } else {
         // XXX: http*S*

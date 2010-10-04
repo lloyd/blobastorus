@@ -14,3 +14,4 @@ working:
   * express - http://expressjs.com/
   * node-mongodb-native - http://github.com/christkv/node-mongodb-native
   * node-oauth - http://github.com/ciaranj/node-oauth
+  * ejs - http://github.com/visionmedia/ejs

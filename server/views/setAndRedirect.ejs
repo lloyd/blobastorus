@@ -1,0 +1,16 @@
+<html>
+<body>
+</body>
+<script type="text/javascript">
+var user = "<%= user %>";
+var secret = "<%= secret %>";
+var kickback = "<%= kickback %>";
+
+window.localStorage.setItem('user', user);
+window.localStorage.setItem('secret', secret);
+window.localStorage.setItem('ts', new Date().toString());
+
+document.location = kickback;
+
+</script>
+</html>

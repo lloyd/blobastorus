@@ -12,6 +12,7 @@ var app = require('express').createServer();
 app.configure(function() {
     app.use(express.staticProvider("../src"));
     app.use(express.bodyDecoder());
+    app.set('view options', { layout: false });
 });
 
 // API to get a blob
@@ -89,12 +90,16 @@ app.get("/auth/callback", function (req, res) {
     twitauth.finishOAuth(oauth_token, oauth_verifier, function(err, uname, secret, kickback) {
         if(err) res.send(err, 503);
         else {
-            // XXX: at this point we should:
+            // Render a page which will do the following on the client:
             // * store the user's twitter username and this random secret under local storage for blobastor.us
             // * send the user back to the application's kickback url.
-
-            // XXX: as a mockup for now it's an http redirect
-            res.redirect(kickback);
+            res.render('./setAndRedirect.ejs', {
+                locals: {
+                    user: uname,
+                    secret: secret,
+                    kickback: kickback
+                }
+            });
         }
     });
 });
