@@ -15,10 +15,23 @@ oa = new OAuth("https://twitter.com/oauth/request_token",
                creds.key, creds.secret,
                "1.0A", "http://localhost:3000/auth/callback", "HMAC-SHA1");
 
-// hack globals for now!  we need storage for continuity from /auth/ call to
-// redirection back to application
-g_oauth_token_secret = null;
-g_kickback = null;
+// An in-memory lookup for oauth tokens.  
+var g_tokens = { };
+
+function goodTS(ts) {
+    return (((new Date() - ts) / 1000.0) < 30.0);
+}
+
+function pruneMemoryTable() {
+    // tokens older than 30s are considered expired.
+    // all the user has to do is log into twitter and allow the app.  If they've allowed
+    // the app before and they're authenticated, it's zero click!  30s should be enough, but
+    // we'll see.
+    for (var i in g_tokens) if (!goodTS(g_tokens[i].ts)) delete g_tokens[i];
+}
+
+// every N requests, we'll prune the token map
+var g_requests = 0;
 
 exports.startOAuth = function(kickback, cb) {
     g_kickback = kickback;
@@ -28,9 +41,18 @@ exports.startOAuth = function(kickback, cb) {
         } else {
             cb(null, auth_endpoint + oauth_token);
 
-            // XXX: save token secret and redirect url (where to send the user after completion)
-            // in some temporal data store!
-            g_oauth_token_secret = oauth_token_secret;
+            // save token secret and redirect url (where to send the user after completion)
+            // in an in_memory hash.
+            g_requests++;
+
+            g_tokens[oauth_token] = {
+                secret: oauth_token_secret,
+                kickback: kickback,
+                ts: new Date()
+            };
+
+            // Every 20 requests let's prune the table
+            if (!(g_requests % 20)) pruneMemoryTable();
         }
     });
 };
@@ -44,8 +66,26 @@ exports.finishOAuth = function(token, verifier, cb) {
         return text;
     }
 
+    // let's find our state from when the request token was attained
+    var oauth_token_secret = null;
+    var kickback = null;
+
+    if (g_tokens[token]) {
+        var t = g_tokens[token];
+        delete g_tokens[token];
+        if (goodTS(t.ts)) {
+            kickback = t.kickback;
+            oauth_token_secret = t.secret;
+        }
+    }
+
+    if (typeof kickback !== 'string' || typeof oauth_token_secret !== 'string') {
+        cb("Unrecognized authentication token.  Please retry authentication!");
+        return;
+    }
+
     oa.getOAuthAccessToken(
-        token, g_oauth_token_secret, verifier,
+        token, oauth_token_secret, verifier,
         function(error, access_token, access_token_secret, results)
         {
             if (error) {
