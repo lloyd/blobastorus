@@ -1,7 +1,7 @@
 // an abstraction to hide as many details as possible around using twitter for
 // authentication and identity.
 var oauth = require('node-oauth');
-var db = require('./db.js');
+var secrets = require('./secrets.js');
 
 // creds must be created by the installer, it should export .key and .secret which are
 // oauth consumer creds
@@ -110,7 +110,7 @@ exports.finishOAuth = function(token, verifier, cb) {
                 var sekret = generateSecret();
 
                 // store in our db an association between twitter id new secret
-                db.saveSecret(tuser, sekret);
+                secrets.save(tuser, sekret);
                 cb(null, tuser, sekret, g_kickback);
             });
         });

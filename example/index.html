@@ -13,7 +13,7 @@
     <div id="signInWithTwitter"><img src="sign-in-with-twitter-d.png" /></div>
     </div>
     <div class="logged-in">
-      <p>Here's what you've got stored:</p>
+    <p>Hi <span id="username"></span>, here's what you've got stored:</p>
 
       <textarea id="stored">...</textarea><br>
       <button id="save">save</button>
@@ -27,30 +27,40 @@ $(document).ready(function() {
     $(".logged-in").hide();
     $(".logged-out").hide();
 
-    Blobastorus.isLoggedIn("http://localhost:3000/example/index.html", function(r) {
-        if (r === true) {
-            $(".logged-in").show();
-        } else {
-            $(".logged-out").show();
-            $("#signInWithTwitter").click(function() {
-                document.location = r;
-            });
-        }
-    });
+    function checkLoginState() {
+        Blobastorus.isLoggedIn("http://localhost:3000/example/index.html", function(redirectUrl, user) {
+            if (redirectUrl) {
+                $(".logged-in").hide();
+                $(".logged-out").show();
+                $("#signInWithTwitter").click(function() {
+                    document.location = redirectUrl;
+                });
+            } else {
+                $("#username").text(user);
+                $(".logged-in").show();
+                $(".logged-out").hide();
+            }
+        });
+    }
 
     $("#save").click(function() {
-        Blobastorus.set($.trim($("#stored").val()), function(v) {
-
+        Blobastorus.set($.trim($("#stored").val()), function(err, v) {
+            if (err === "needsAuth") checkLoginState();
         });
     });
 
-    Blobastorus.get(function(v) {
-        if (v === null) v = "";
-        if (typeof v === 'string') {
-
-            $("#stored").val(v);
+    Blobastorus.get(function(err, v) {
+        if (err) {
+            if (err === "needsAuth") checkLoginState();
+        } else {
+            if (v === null) v = "";
+            if (typeof v === 'string') {
+                $("#stored").val(v);
+            }
         }
     });
+
+    checkLoginState();
 });
 </script>
 </html>

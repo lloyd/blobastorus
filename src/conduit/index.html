@@ -1,6 +1,8 @@
 <script type="text/javascript" src="jschannel-min.js"></script>
 <script type="text/javascript">
 
+var sto = window.localStorage;
+
 // wrap browser diffs
 if (!window.XMLHttpRequest) {
     window.XMLHttpRequest = function () {
@@ -18,11 +20,19 @@ function cleanOrigin(o) {
 var chan = Channel.build({window: window.parent, origin: "*", scope: "blobastorus"});
 
 chan.bind("get", function(trans, args) {
+    var user = sto.getItem("user");
+    var secret = sto.getItem("secret");
+
+    if (!user || !secret) {
+        sto.clear();
+        throw [ "needsAuth", "Client application must authenticate the user" ];
+    }
+
     // we will be async
     trans.delayReturn(true);
 
     var origin = cleanOrigin(trans.origin);
-    var url = "/api/get/" + origin + "/" + "XXXX";
+    var url = "/api/get/" + origin + "/" + user;
 
     var r = new XHR();
     r.open('GET', url, true);
@@ -43,11 +53,19 @@ chan.bind("get", function(trans, args) {
 });
 
 chan.bind("set", function(trans, args) {
+    var user = sto.getItem("user");
+    var secret = sto.getItem("secret");
+
+    if (!user || !secret) {
+        sto.clear();
+        throw [ "needsAuth", "Client application must authenticate the user" ];
+    }
+
     // we will be async
     trans.delayReturn(true);
 
     var origin = cleanOrigin(trans.origin);
-    var url = "/api/set/" + origin + "/" + "XXXX";
+    var url = "/api/set/" + origin + "/" + user;
 
     var r = new XHR();
     r.open('POST', url, true);
@@ -58,20 +76,22 @@ chan.bind("set", function(trans, args) {
             e.preventDefault();
             if (r.status == 200) {
                 trans.complete(true);
+            } else if(r.status === 403) {
+                sto.clear();
+                trans.error("needsAuth", "Client application must authenticate the user");
             } else {
                 trans.complete(false);
             }
         }
     };
-    r.send("data=" + JSON.stringify(args));
+    r.send("secret="+secret+"&data=" + JSON.stringify(args));
 });
 
 chan.bind("isLoggedIn", function(trans, args) {
-    // being logged in signifies that the users twitter username and secret
-    // is set in local storage.
-    var sto = window.localStorage;
+    // if the user's twitter username, secret, and ts are in local storage,
+    // they are logged in
 
-    // Expire secrets after 2 weeks (?).
+    // expire secrets after 2 weeks (?).
     var ts = sto.getItem("ts")
     if (typeof ts === 'string') {
         var ts = new Date(sto.getItem("ts"));
@@ -80,12 +100,12 @@ chan.bind("isLoggedIn", function(trans, args) {
 
     var user = sto.getItem("user");
     var secret = sto.getItem("secret");
-    
+
     if (user && secret) {
-        return true;
+        return user;
     } else {
         // XXX: http*S*
-        return "http://localhost:3000/auth/?kickback=" + args;
+        throw [ "needsAuth", "http://localhost:3000/auth/?kickback=" + args ];
     }
 });
 

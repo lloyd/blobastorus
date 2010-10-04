@@ -58,28 +58,31 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
         get: function(cb) {
             chan.call({
                 method: "get",
-                success: function(v) { cb(v); },
-                error: function(e) { alert("unexpected error: " + JSON.stringify(e)); }
+                success: function(v) { cb(null, v); },
+                error: function(e, msg) { cb(e, null); }
             });
         },
         set: function(val,cb) {
             chan.call({
                 method: "set",
                 params: val,
-                success: function(v) { cb(v); },
-                error: function(e) { alert("unexpected error: " + JSON.stringify(e)); }
+                success: function(v) { cb(null, v); },
+                error: function(e,msg) { cb(e, null); }
             });
         },
         isLoggedIn: function(kickback, cb) {
             chan.call({
                 method: "isLoggedIn",
                 params: kickback,
-                success: function(v) {
-                    cb(v);
-                },
-                error: function(e) { alert("unexpected error: " + JSON.stringify(e)); }
+                success: function(v) { cb(null, v); },
+                error: function(e, msg) {
+                    if (e === 'needsAuth') {
+                        cb(msg, null);
+                    } else {
+                        alert("unexpected error (" + e + "): " + msg);
+                    }
+                }
             });
         }
-
     };
 })();

@@ -4,6 +4,10 @@ var db = require('./db.js');
 // load our twitter authentication abstraction
 var twitauth = require('./twitauth.js');
 
+// load the secret store, our abstraction around
+// auth secret storage and management
+var secrets = require('./secrets.js');
+
 // create an application
 var express = require('express');
 var app = require('express').createServer();
@@ -34,17 +38,27 @@ app.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
     // req.params[1] is twitter username
     // body contains:
     //   data: json stringified blob to store
+    var user = req.params[1];
+    var domain = req.params[0];
     var data = null;
+    var secret = null;
     try {
         data = JSON.parse(req.body.data);
+        secret = req.body.secret;
     } catch(e) {
         // parse error! bad inputs!
         res.send(400);
         return;
     }
 
+    // and check the auth creds
+    if (!secrets.auth(user, secret)) {
+        res.send(403);
+        return;
+    }
+
     // domain is a collection name, open the collection
-    db.set(req.params[0], req.params[1], data, function() {
+    db.set(domain, user, data, function() {
         res.send(200);
     });
 });
