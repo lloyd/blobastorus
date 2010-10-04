@@ -1,1 +1,3 @@
-creds.js
+/certificate.pem
+/privatekey.pem
+/creds.js
