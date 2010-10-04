@@ -13,7 +13,7 @@ var OAuth = require('node-oauth').OAuth;
 oa = new OAuth("https://twitter.com/oauth/request_token",
                "https://twitter.com/oauth/access_token",
                creds.key, creds.secret,
-               "1.0A", "http://localhost:3000/auth/callback", "HMAC-SHA1");
+               "1.0A", "https://localhost:3001/auth/callback", "HMAC-SHA1");
 
 // An in-memory lookup for oauth tokens.  
 var g_tokens = { };

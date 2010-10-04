@@ -11,12 +11,16 @@ var secrets = require('./secrets.js');
 // create an application
 var express = require('express');
 var app = require('express').createServer();
+var apps = require('express').createServer();
 
 // serve all files in ../src statically
 app.configure(function() {
     app.use(express.staticProvider("../src"));
-    app.use(express.bodyDecoder());
-    app.set('view options', { layout: false });
+});
+
+apps.configure(function() {
+    apps.use(express.bodyDecoder());
+    apps.set('view options', { layout: false });
 });
 
 // validate domains
@@ -42,11 +46,9 @@ app.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
 });
 
 // API to set a blob
-// XXX: the request of this call includes a secret which must be
-// protected from eavsedropping!  Add HTTPS here.
 // XXX: oh yeah, alternatively the client could sign their request
 // with the secret and we could reduce the amount of HTTPSery going on.
-app.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
+apps.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
     // req.params[0] is domain
     // req.params[1] is twitter username
     // body contains:
@@ -117,9 +119,9 @@ app.get("/auth/", function (req, res) {
 });
 
 // Complete twitter authentication (twitter redirects user here)
-// XXX: The response of this call sends a secret down to the user
-// which must be protected from eavsedropping! Add HTTPS here.
-app.get("/auth/callback", function (req, res) {
+// The response of this call sends a secret down to the user,
+// hence, HTTPS.
+apps.get("/auth/callback", function (req, res) {
     var oauth_token = req.query.oauth_token;
     var oauth_verifier = req.query.oauth_verifier;
 
@@ -145,7 +147,16 @@ app.get("/auth/callback", function (req, res) {
     });
 });
 
+const fs = require("fs"),
+      crypto = require('crypto');
+var privateKey = fs.readFileSync('privatekey.pem').toString();
+var certificate = fs.readFileSync('certificate.pem').toString();
+var credentials = crypto.createCredentials({key: privateKey, cert: certificate});
+
+apps.setSecure(credentials);
+
 // open a connection to the databse, upon success we'll bind our webserver
 db.open(function() {
     app.listen(3000);
+    apps.listen(3001);
 });

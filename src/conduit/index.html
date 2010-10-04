@@ -65,7 +65,7 @@ chan.bind("set", function(trans, args) {
     trans.delayReturn(true);
 
     var origin = cleanOrigin(trans.origin);
-    var url = "/api/set/" + origin + "/" + user;
+    var url = "https://localhost:3001/api/set/" + origin + "/" + user;
 
     var r = new XHR();
     r.open('POST', url, true);
