@@ -40,10 +40,8 @@ chan.bind("get", function(trans, args) {
 
     var r = new XHR();
     r.open('GET', url, true);
-
     r.onreadystatechange = function (e) { 
         if (r.readyState == 4) {
-            e.preventDefault();
             if (r.status == 200) {
                 trans.complete(JSON.parse(r.responseText));
             } else if (r.status == 404) {
