@@ -65,7 +65,7 @@ chan.bind("set", function(trans, args) {
     trans.delayReturn(true);
 
     var origin = cleanOrigin(trans.origin);
-    var url = "https://localhost:3001/api/set/" + origin + "/" + user;
+    var url = "https://blobastor.us/api/set/" + origin + "/" + user;
 
     var r = new XHR();
     r.open('POST', url, true);
@@ -104,8 +104,7 @@ chan.bind("isLoggedIn", function(trans, args) {
     if (user && secret) {
         return user;
     } else {
-        // XXX: http*S*
-        throw [ "needsAuth", "http://localhost:3000/auth/?kickback=" + args ];
+        throw [ "needsAuth", "http://blobastor.us/auth/?kickback=" + args ];
     }
 });
 

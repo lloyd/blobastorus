@@ -1,2 +1,7 @@
 * use api.js in conduit/index.html too, so that the browse can effectively cache jschannel, and browser doesn't have to fetch twice.
-* figger out https support in node.
+* logging support?
+* https is currently required for every transaction.  That sucks, but if we wanted to only use it for moving secrets to the client
+  then we would need to solve the following two problems:
+  + secure the set api with some kind of signature nonce or challenge/response
+  + move secrets from https://blobastor.us to http://blobastor.us on the client
+  Both of these challenges are kinda interesting, but not really needed for a first cut.

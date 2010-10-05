@@ -1,4 +1,0 @@
-// copy this to creds.js and plunk in your application key and secret!
-exports.key='<your key>';
-exports.secret='<your secret>';
-

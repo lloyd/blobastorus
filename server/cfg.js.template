@@ -1,0 +1,29 @@
+// replace <> values and copy this to cfg.js 
+
+// twitter application key and secret
+exports.key='<your key>';
+exports.secret='<your secret>';
+
+// who should the process run as after binding ports
+// set to null if you want to run as 
+exports.who='<username>';
+
+// you shouldnt have to change these, and if you do you
+// might get into localStorage trouble (the domain where
+// keys are set must be the same as the domain where the
+// conduit runs
+exports.port=80;
+exports.sslport=443;
+
+// for local development, you  might want to add an ip to your favorite
+// interface, and add an entry to /etc/hosts to alias blobastor.us
+// to that interface.  this gives you a way to develop locally.
+exports.ip_to_bind='0.0.0.0';
+
+// you can install the node dependencies where-ever you like,
+// and provide a path here. 'null' will add nothing to the
+// include path
+exports.node_libraries=null;
+
+// where shall we log to?
+exports.logfile=null;

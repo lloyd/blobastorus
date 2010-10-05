@@ -3,17 +3,17 @@
 var oauth = require('node-oauth');
 var secrets = require('./secrets.js');
 
-// creds must be created by the installer, it should export .key and .secret which are
+// cfg must be created by the installer, it should export .key and .secret which are
 // oauth consumer creds
-var creds = require('./creds.js');
+var cfg = require('./cfg.js');
 
 var auth_endpoint = 'https://api.twitter.com/oauth/authenticate?oauth_token=';
 
 var OAuth = require('node-oauth').OAuth;
 oa = new OAuth("https://twitter.com/oauth/request_token",
                "https://twitter.com/oauth/access_token",
-               creds.key, creds.secret,
-               "1.0A", "https://localhost:3001/auth/callback", "HMAC-SHA1");
+               cfg.key, cfg.secret,
+               "1.0A", "https://blobastor.us/auth/callback", "HMAC-SHA1");
 
 // An in-memory lookup for oauth tokens.  
 var g_tokens = { };

@@ -21,14 +21,14 @@
   </div>
 
 </body>
-<script type="text/javascript" src="http://localhost:3000/api.js"></script>
+<script type="text/javascript" src="https://blobastor.us/api.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $(".logged-in").hide();
     $(".logged-out").hide();
 
     function checkLoginState() {
-        Blobastorus.isLoggedIn("http://localhost:3000/example/index.html", function(redirectUrl, user) {
+        Blobastorus.isLoggedIn(document.location.href, function(redirectUrl, user) {
             if (redirectUrl) {
                 $(".logged-in").hide();
                 $(".logged-out").show();

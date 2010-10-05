@@ -1,3 +1,9 @@
+// configuration
+var cfg = require('./cfg.js');
+
+// add a path to find node libraries if required 
+if (cfg.node_libraries) require.paths.unshift(cfg.node_libraries);
+
 // load our own little database abstraction
 var db = require('./db.js');
 
@@ -15,10 +21,11 @@ var apps = require('express').createServer();
 
 // serve all files in ../src statically
 app.configure(function() {
-    app.use(express.staticProvider("../src"));
+    app.use(express.staticProvider("../site"));
 });
 
 apps.configure(function() {
+    apps.use(express.staticProvider("../src"));
     apps.use(express.bodyDecoder());
     apps.set('view options', { layout: false });
 });
@@ -29,7 +36,7 @@ function validDomain(domain) {
 }
 
 // API to get a blob
-app.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
+apps.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
     var domain = req.params[0];
     var user = req.params[1];
 
@@ -87,7 +94,7 @@ apps.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
 
 // API to list users who have stored blobs for a given domain
 // XXX: no, this wouldn't really scale.
-app.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
+apps.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
     var domain = req.params[0];
 
     if (!validDomain(domain)) {
@@ -103,7 +110,7 @@ app.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
 });
 
 // Begin twitter authentication (application redirects user here)
-app.get("/auth/", function (req, res) {
+apps.get("/auth/", function (req, res) {
     var kickback = req.query.kickback;
 
     if (!kickback) {
@@ -157,6 +164,7 @@ apps.setSecure(credentials);
 
 // open a connection to the databse, upon success we'll bind our webserver
 db.open(function() {
-    app.listen(3000);
-    apps.listen(3001);
+    app.listen(cfg.port, cfg.ip_to_bind);
+    apps.listen(cfg.sslport, cfg.ip_to_bind);
+    if (cfg.who) process.setuid(cfg.who);
 });
