@@ -33,37 +33,44 @@ while(pendingQueue.length){postMessage(pendingQueue.pop());}
 if(typeof cfg.onReady==='function')cfg.onReady(obj);};var obj={unbind:function(method){if(regTbl[method]){if(!(delete regTbl[method]))throw("can't delete method: "+method);return true;}
 return false;},bind:function(method,cb){if(!method||typeof method!=='string')throw"'method' argument to bind must be string";if(!cb||typeof cb!=='function')throw"callback missing from bind params";if(regTbl[method])throw"method '"+method+"' is already bound!";regTbl[method]=cb;},call:function(m){if(!m)throw'missing arguments to call function';if(!m.method||typeof m.method!=='string')throw"'method' argument to call must be string";if(!m.success||typeof m.success!=='function')throw"'success' callback missing from call";var callbacks={};var callbackNames=[];var pruneFunctions=function(path,obj){if(typeof obj==='object'){for(var k in obj){if(!obj.hasOwnProperty(k))continue;var np=path+(path.length?'/':'')+k;if(typeof obj[k]==='function'){callbacks[np]=obj[k];callbackNames.push(np);delete obj[k];}else if(typeof obj[k]==='object'){pruneFunctions(np,obj[k]);}}}};pruneFunctions("",m.params);var msg={id:s_curTranId,method:scopeMethod(m.method),params:m.params};if(callbackNames.length)msg.callbacks=callbackNames;outTbl[s_curTranId]={callbacks:callbacks,error:m.error,success:m.success};s_transIds[s_curTranId]=onMessage;s_curTranId++;postMessage(msg);},notify:function(m){if(!m)throw'missing arguments to notify function';if(!m.method||typeof m.method!=='string')throw"'method' argument to notify must be string";postMessage({method:scopeMethod(m.method),params:m.params});},destroy:function(){s_removeBoundChan(cfg.origin,((typeof cfg.scope==='string')?cfg.scope:''));if(window.removeEventListener)window.removeEventListener('message',onMessage,false);else if(window.detachEvent)window.detachEvent('onmessage',onMessage);ready=false;regTbl={};inTbl={};outTbl={};cfg.origin=null;pendingQueue=[];debug("channel destroyed");chanId="";}};obj.bind('__ready',onReady);setTimeout(function(){postMessage({method:scopeMethod('__ready'),params:"ping"},true);},0);return obj;}};})();
 
-    // First, we'll create an iframe to hold the blobastorus "conduit"
-    var doc = window.document;
-    this.iframe = doc.createElement("iframe");
-    this.iframe.style.position = "absolute";
-    this.iframe.style.left = "-999px";
-    this.iframe.style.top = "-999px";
-    this.iframe.style.display = "none";
+    var chan = null;
 
-    // Append iframe to the dom and load up target conduit inside
-    doc.body.appendChild(this.iframe);
-    this.iframe.src = "https://blobastor.us/conduit/index.html";
+    // a function that creates channel on demand
+    function getChan() {
+        if (!chan) {
+            // First, we'll create an iframe to hold the blobastorus "conduit"
+            var doc = window.document;
+            this.iframe = doc.createElement("iframe");
+            this.iframe.style.position = "absolute";
+            this.iframe.style.left = "-999px";
+            this.iframe.style.top = "-999px";
+            this.iframe.style.display = "none";
 
-    var conduit = this;
-    // now create a Channel
-    var chan = Channel.build({
-        window: this.iframe.contentWindow,
-        origin: "*", //XXX:fixme
-        scope: "blobastorus"
-    });
+            // Append iframe to the dom and load up target conduit inside
+            doc.body.appendChild(this.iframe);
+            this.iframe.src = "https://blobastor.us/conduit/index.html";
 
-    var sto = window.localStorage;
+            var conduit = this;
+            // now create a Channel
+            chan = Channel.build({
+                window: this.iframe.contentWindow,
+                origin: "blobastor.us", //XXX:fixme
+                scope: "blobastorus"
+            });
+        }
+        return chan;
+    }
+
     return {
         get: function(cb) {
-            chan.call({
+            getChan().call({
                 method: "get",
                 success: function(v) { cb(null, v); },
                 error: function(e, msg) { cb(e, null); }
             });
         },
         set: function(val,cb) {
-            chan.call({
+            getChan().call({
                 method: "set",
                 params: val,
                 success: function(v) { cb(null, v); },
@@ -71,7 +78,7 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
             });
         },
         isLoggedIn: function(kickback, cb) {
-            chan.call({
+            getChan().call({
                 method: "isLoggedIn",
                 params: kickback,
                 success: function(v) { cb(null, v); },
@@ -83,6 +90,11 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
                     }
                 }
             });
-        }
+        },
+        // And return a reference to the local copy of our channel.  This trick
+        // allows the same javascript file to be used on either side of the channel,
+        // allowing browser caching to keep identical code from getting delivered
+        // twice.
+        chan: Channel
     };
 })();

@@ -1,4 +1,4 @@
-<script type="text/javascript" src="jschannel-min.js"></script>
+<script type="text/javascript" src="/api.js"></script>
 <script type="text/javascript">
 
 var sto = window.localStorage;
@@ -17,7 +17,11 @@ function cleanOrigin(o) {
     return o.replace(/^[a-z]+:\/\//, "");
 }
 
-var chan = Channel.build({window: window.parent, origin: "*", scope: "blobastorus"});
+var chan = Blobastorus.chan.build({
+    window: window.parent,
+    origin: "*", // any domain may speak with blobastor.us
+    scope: "blobastorus"
+});
 
 chan.bind("get", function(trans, args) {
     var user = sto.getItem("user");

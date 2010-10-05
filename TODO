@@ -1,4 +1,3 @@
-* use api.js in conduit/index.html too, so that the browse can effectively cache jschannel, and browser doesn't have to fetch twice.
 * logging support?
 * https is currently required for every transaction.  That sucks, but if we wanted to only use it for moving secrets to the client
   then we would need to solve the following two problems:
