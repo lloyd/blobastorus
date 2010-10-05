@@ -104,7 +104,7 @@ chan.bind("isLoggedIn", function(trans, args) {
     if (user && secret) {
         return user;
     } else {
-        throw [ "needsAuth", "http://blobastor.us/auth/?kickback=" + args ];
+        throw [ "needsAuth", "https://blobastor.us/auth/?kickback=" + args ];
     }
 });
 
