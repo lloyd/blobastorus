@@ -10,7 +10,7 @@ body {
   color: #444;
 }
 
-#content {
+#splash {
   margin-left: auto;
   margin-right: auto;
   margin-top: 150px;
@@ -30,15 +30,117 @@ body {
   font-family: fixed, 'lucida console', monaco, 'andale mono', 'bitstream vera sans mono', consolas, monospace;
 }
 
+#content {
+  width:800px;
+  margin: 0 auto;
+  display:none;
+}
+
+#header {
+  width: 800px;
+  height: 95px;
+  position: relative;
+}
+
+#lillogo {
+  background: url('i/blobastorus_200w_flip.png') no-repeat center;
+  width: 200px;
+  height: 95px;
+}
+
+#header {
+  font-family: georgia, 'bitstream vera serif', serif;
+  font-weight: bold;
+}
+
+#title {
+  position: absolute;
+  top: 0;
+  letter-spacing: -4px;
+  font-size: 3em;
+  left: 220px;
+}
+
+#nav {
+  bottom: 5px;
+  position: absolute;
+  width: 550px;
+  left: 225px;
+}
+
+#nav > div {
+  float: right;
+  margin-right: 60px;
+}
+
+#meat > div {
+  display:none;
+}
+
 </style>
 </head>
 <body>
-  <div id="content">
+  <div id="splash">
   <div id="desc">
     <b>blob·a·stor·us</b> <span class="pronounce">\ˈblɒb-ɒ-stʊr-əs\</span>
     <i>n</i> 1: a huge creature who lives in the cloud and stores
     JSON blobs for HTML5 apps.
   </div>
   </div>
+  <div id="content">
+    <div id="header">
+      <div id="lillogo"></div>
+      <div id="title">blobastor.us</div>
+      <div id="nav">
+        <div id="cred">CRED</div>
+        <div id="data">DATA</div>
+        <div id="usage">USAGE</div>
+        <div id="overview">OVERVIEW</div>
+      </div>
+      <div id="meat">
+        <div id="cred_meat">
+          credits!
+        </div>
+        <div id="data_meat">
+          check out all the stored data
+        </div>
+        <div id="usage_meat">
+          How do you use it?
+        </div>
+        <div id="overview_meat">
+          High level overview
+        </div>
+      </div>
+    </div>
+    <div id="header">
+  </div>
 </body>
+<script src="js/jquery-min.js"></script>
+<script>
+$(document).ready(function() {
+    // click on the definition to enter the site.  Will this get annoying?
+    $("#desc").hover(function() {
+        $(this).css("color", "#000");
+    }, function () {
+        $(this).css("color", "#444");
+    }).click(function() {
+        $('#splash').hide();
+        $('#overview_meat').show();
+        $('#content').fadeIn(500);
+    });
+
+    // and similarly for site navigation
+    $("#nav > div").hover(function() {
+        $(this).css("color", "#000");
+    }, function () {
+        $(this).css("color", "#444");
+    }).click(function() {
+        // hide everyone
+        $("#meat > div").hide();
+        // fade in panel selected
+        $("#"+ $(this).attr('id')  +"_meat").fadeIn(300);
+    });
+
+});
+</script>
 </html>
