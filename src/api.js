@@ -59,35 +59,51 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
         return chan;
     }
 
+    var scope = ""
+
     return {
-        get: function(cb) {
+        setScope: function(s) {
+            scope = s;
+        },
+        getUser: function(cb) {
+            console.log("getUser called");
             getChan().call({
-                method: "get",
-                success: function(v) { cb(null, v); },
-                error: function(e, msg) { cb(e, null); }
+                method: "user",
+                success: function(v) { cb(v, null); },
+                error: function(e, msg) { cb(null, e); }
             });
         },
-        set: function(val,cb) {
+
+        getBlob: function(args, cb) {
+            if (typeof args === 'function') {
+                cb = args;
+                args = {};
+            }
+            if (!args.scope) args.scope = scope;
             getChan().call({
-                method: "set",
-                params: val,
-                success: function(v) { cb(null, v); },
-                error: function(e,msg) { cb(e, null); }
+                method: "getBlob",
+                params: args,
+                success: function(v) { cb(v, null); },
+                error: function(e, msg) { cb(null, e); }
             });
         },
-        isLoggedIn: function(kickback, cb) {
+        setBlob: function(val,cb) {
+            // allow cb to be optional
+            if (typeof cb !== 'function') cb = function() {};
             getChan().call({
-                method: "isLoggedIn",
-                params: kickback,
-                success: function(v) { cb(null, v); },
-                error: function(e, msg) {
-                    if (e === 'needsAuth') {
-                        cb(msg, null);
-                    } else {
-                        alert("unexpected error (" + e + "): " + msg);
-                    }
-                }
+                method: "setBlob",
+                params: {
+                    scope: scope,
+                    data: val
+                },
+                success: function() { cb(null); },
+                error: function(e) { cb(e); }
             });
+        },
+        redirectUser: function(args) {
+            var url = 'https://blobastor.us/auth/?kickback='; 
+            url += ((args && args.return_to === 'string') ? args.return_to : document.location.href);
+            document.location = url;
         },
         // And return a reference to the local copy of our channel.  This trick
         // allows the same javascript file to be used on either side of the channel,

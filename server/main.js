@@ -36,9 +36,10 @@ function validDomain(domain) {
 }
 
 // API to get a blob
-apps.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
+apps.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)\/([^\/]+)$/, function(req, res){
     var domain = req.params[0];
-    var user = req.params[1];
+    var scope = req.params[1];
+    var user = req.params[2];
 
     if (!validDomain(domain)) {
         res.send(400);
@@ -47,21 +48,23 @@ apps.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
 
     // get the blob associated with the domain (req.params[0]) and
     // (user req.params[2]) requested.
-    db.get(domain, user, function(e,doc) {
-        res.send((doc && doc.data) ? JSON.stringify(doc.data) : 404);
+    db.get(domain, scope, user, function(e,doc) {
+        res.send(doc ? JSON.stringify(doc) : 404);
     });
 });
 
 // API to set a blob
 // XXX: oh yeah, alternatively the client could sign their request
 // with the secret and we could reduce the amount of HTTPSery going on.
-apps.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
+apps.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)\/([^\/]+)$/, function(req, res){
     // req.params[0] is domain
-    // req.params[1] is twitter username
+    // req.params[1] is data scope
+    // req.params[2] is twitter username
     // body contains:
     //   data: json stringified blob to store
-    var user = req.params[1];
     var domain = req.params[0];
+    var scope = req.params[1];
+    var user = req.params[2];
     var data = null;
     var secret = null;
 
@@ -85,7 +88,7 @@ apps.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([^\/]+)$/, function(req, res){
             res.send(403);
         } else {
             // domain is a collection name, open the collection
-            db.set(domain, user, data, function() {
+            db.set(domain, scope, user, data, function() {
                 res.send(200);
             });
         }

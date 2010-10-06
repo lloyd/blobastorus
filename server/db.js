@@ -14,21 +14,41 @@ exports.open = function(cb) {
 };
 
 // XXX: error handling
-exports.get = function(domain,user,cb) {
+exports.get = function(domain,scope,user,cb) {
+    if (scope === "") scope = "*";
     db.collection(domain, function(err, col) {
         col.find({user:user}, {limit:1}, function(err, cur) {
             cur.nextObject(function(e,doc) {
-                cb(e,doc);
+                console.log("ungh: " + JSON.stringify(doc));
+                var rv = null;
+                console.log(doc.data[scope]);
+                if (doc && doc.data && doc.data[scope]) rv = doc.data[scope];
+                cb(e,rv);
             });
         });
     });
 };
 
-exports.set = function(domain,user,data,cb) {
+exports.set = function(domain,scope,user,data,cb) {
+    if (scope === "") scope = "*";
+    console.log("set, domain: " + domain);
+    console.log("set, scope: " + scope);
+    console.log("set, user: " + user);
     db.collection(domain, function(err, col) {
-        col.findAndModify({user:user}, [], {'$set':{data:data}}, {upsert:true}, function(err, cur) {
-            // XXX: error handling?
-            cb();
+        col.find({user:user}, {limit:1}, function(err, cur) {
+            cur.nextObject(function(e,doc) {
+                if (doc === null) {
+                    doc = {
+                        user:user,
+                        data: { }
+                    };
+                }
+                doc.data[scope] = data;
+                col.findAndModify({user:user}, [], doc, {upsert:true}, function(err, cur) {
+                    // XXX: error handling?
+                    cb();
+                });
+            });
         });
     });
 };

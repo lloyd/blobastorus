@@ -23,20 +23,17 @@ var chan = Blobastorus.chan.build({
     scope: "blobastorus"
 });
 
-chan.bind("get", function(trans, args) {
-    var user = sto.getItem("user");
-    var secret = sto.getItem("secret");
+chan.bind("getBlob", function(trans, args) {
+    if (typeof args !== 'object') args = { };
 
-    if (!user || !secret) {
-        sto.clear();
-        throw [ "needsAuth", "Client application must authenticate the user" ];
-    }
+    var user = sto.getItem("user");
+    var scope = (args.scope ? args.scope : "");
+    var origin = cleanOrigin(args.origin ? args.origin : trans.origin);
 
     // we will be async
     trans.delayReturn(true);
 
-    var origin = cleanOrigin(trans.origin);
-    var url = "/api/get/" + origin + "/" + user;
+    var url = "/api/get/" + origin + "/" + scope + "/" + user;
 
     var r = new XHR();
     r.open('GET', url, true);
@@ -54,7 +51,14 @@ chan.bind("get", function(trans, args) {
     r.send(null);
 });
 
-chan.bind("set", function(trans, args) {
+chan.bind("setBlob", function(trans, args) {
+    var scope = "";
+    var data = undefined; // undefined is different than null
+    if (typeof args.scope !== 'string' ) throw [ "protocolError", "missing required scope argument" ];
+    console.log("your momma");
+    scope = args.scope;
+    if (args.data) data = args.data;
+
     var user = sto.getItem("user");
     var secret = sto.getItem("secret");
 
@@ -63,11 +67,13 @@ chan.bind("set", function(trans, args) {
         throw [ "needsAuth", "Client application must authenticate the user" ];
     }
 
+
     // we will be async
     trans.delayReturn(true);
 
     var origin = cleanOrigin(trans.origin);
-    var url = "https://blobastor.us/api/set/" + origin + "/" + user;
+    // XXX: add in scope
+    var url = "https://blobastor.us/api/set/" + origin + "/" + scope + "/" + user;
 
     var r = new XHR();
     r.open('POST', url, true);
@@ -86,10 +92,11 @@ chan.bind("set", function(trans, args) {
             }
         }
     };
-    r.send("secret="+secret+"&data=" + JSON.stringify(args));
+    r.send("secret="+secret+"&data=" + ((data === undefined) ? "" : JSON.stringify(data)));
 });
 
-chan.bind("isLoggedIn", function(trans, args) {
+chan.bind("user", function(trans, args) {
+    console.log("user called");
     // if the user's twitter username, secret, and ts are in local storage,
     // they are logged in
 
@@ -98,6 +105,8 @@ chan.bind("isLoggedIn", function(trans, args) {
     if (typeof ts === 'string') {
         var ts = new Date(sto.getItem("ts"));
         if (((new Date() - ts) / 1000.0) > (14 * 24 * 60 * 60)) sto.clear();
+    } else {
+        sto.clear();
     }
 
     var user = sto.getItem("user");
@@ -106,7 +115,7 @@ chan.bind("isLoggedIn", function(trans, args) {
     if (user && secret) {
         return user;
     } else {
-        throw [ "needsAuth", "https://blobastor.us/auth/?kickback=" + args ];
+        throw [ "needsAuth", "authentication required, no user is logged in." ];
     }
 });
 
