@@ -4,8 +4,17 @@
 <title>blobastorus</title>
 <style type="text/css" media="screen">
 
+#ccBadge {
+  padding:5px;
+  position: fixed;
+  right:5px;
+  bottom:5px;
+  font-size: .5em;
+  text-align:right;
+}
+
 body {
-  font-family: Cardo, 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+  font-family: Baskerville, Georgia, serif;
   font-size: 12pt;
   color: #444;
 }
@@ -18,11 +27,20 @@ body {
   height:283px;
   border: 1px solid white;
   background: url('i/blobastorus_bg.png') no-repeat center;
+  display: none;
+}
+
+a {
+  color: #444;
 }
 
 #desc {
   margin-top: 15%;
   font-size: 2em;
+}
+
+#desc > a {
+  text-decoration: none;
 }
 
 .pronounce {
@@ -73,6 +91,18 @@ body {
   margin-right: 60px;
 }
 
+#nav a {
+    text-decoration: none;
+}
+
+#nav a.hover {
+    color: #000;
+}
+
+#nav a.selected {
+    color: #000;
+}
+
 #meat > div {
   display:none;
 }
@@ -81,44 +111,102 @@ body {
 </head>
 <body>
   <div id="splash">
-  <div id="desc">
+  <div id="desc"><a href="#overview">
     <b>blob·a·stor·us</b> <span class="pronounce">\ˈblɒb-ɒ-stʊr-əs\</span>
     <i>n</i> 1: a huge creature who lives in the cloud and stores
     JSON blobs for HTML5 apps.
-  </div>
+  </a></div>
   </div>
   <div id="content">
     <div id="header">
       <div id="lillogo"></div>
       <div id="title">blobastor.us</div>
       <div id="nav">
-        <div id="cred">CRED</div>
-        <div id="data">DATA</div>
-        <div id="usage">USAGE</div>
-        <div id="overview">OVERVIEW</div>
-      </div>
-      <div id="meat">
-        <div id="cred_meat">
-          credits!
-        </div>
-        <div id="data_meat">
-          check out all the stored data
-        </div>
-        <div id="usage_meat">
-          How do you use it?
-        </div>
-        <div id="overview_meat">
-          High level overview
-        </div>
+        <div id="data"><a href="#data">DATA</a></div>
+        <div id="tutorial"><a href="#tutorial">TUTORIAL</a></div>
+        <div id="docs"><a href="#docs">DOCS</a></div>
+        <div id="overview"><a href="#overview">OVERVIEW</a></div>
       </div>
     </div>
-    <div id="header">
+    <div id="meat">
+      <div id="data_meat">
+        check out all the stored data
+      </div>
+      <div id="tutorial_meat">
+      </div>
+      <div id="docs_meat">
+        <h2> an example </h2>
+        <p>
+
+        </p>
+        <h2> including </h2>
+        <p>
+          The first thing you&#39;ll need to do to use blobastorus is to
+          include the javascript library
+        </p>
+      </div>
+      <div id="overview_meat">
+        <p>
+          <b>blobastor.us</b> is a free data storage service that is
+          optimized for HTML5 web applications.  The service is
+          designed to be interfaced from client javascript code and to
+          eliminate the need for a server component for most little HTML5
+          apps.  Twitter is used to provide authentication and user identity.
+        </p><p>
+          The goal of the project is to make it easier and faster to build
+          small standalone social applications using web technologies.
+        </p>
+        <h2> how it works</h2> 
+        <p>
+          Client code includes a little javascript library which provides
+          access to blobastor.us servers via a smallish asynchronous API.
+          Using this library apps can efficiently query and store data that is
+          scoped to their domain.  The key ideas are:
+          <ul>
+            <li> All data stored in the system is publically visible.
+            <li> Only users with valid twitter accounts may store data.
+            <li> <i>users</i> own their data and no changes can be made
+              without a valid identity
+            <li> Data is scoped by both 'domain' and a logical 'scope', so that multiple
+              apps may peacefully co-exist.
+            <li> Storage space is limited to 20k per user per domain.
+          </ul>
+        </p>
+        <h2> the service </h2> 
+        <p>
+          blobastor.us is free to use, and the code that fuels it is
+          <a href="http://github.com/lloyd/blobastorus">open source</a>.
+          The service comes without any warranty and may change without
+          any notice.  But then, if you come to rely on this service, and it
+          dies, you can always take the code and build your own blobastor.
+        </p>
+        <h2> cred </h2> 
+        <p>
+          This application was conceived of by <a href="http://toolness.com">Atul Varma</a>,
+          and is a remix of his <a href="http://www.toolness.com/wp/?p=1058">twitblob</a> service.
+        </p>
+        <p>
+          The name <i>blobastorus</i> was inspired by the
+          Brontosaurus, a creature that never was.
+        </p>
+        <p>
+          The mascot image is a remix of a picture taken by flickr user, 
+          <a href="http://www.flickr.com/photos/walker_hamilton/3678053315">walker_hamilton</a>.
+        </p>
+        <p>
+          <a href="http://trickyco.de">Lloyd</a> wrote blobastor.us.
+        </p>
+      </div>
+    </div>
   </div>
+<div id="ccBadge">
+Lloyd&nbsp;Hilaiel<br><a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/us/80x15.png" /></a>
+</div>
 </body>
 <script src="js/jquery-min.js"></script>
 <script>
 $(document).ready(function() {
-    // click on the definition to enter the site.  Will this get annoying?
+    // click on the definition to enter the site
     $("#desc").hover(function() {
         $(this).css("color", "#000");
     }, function () {
@@ -129,18 +217,39 @@ $(document).ready(function() {
         $('#content').fadeIn(500);
     });
 
-    // and similarly for site navigation
-    $("#nav > div").hover(function() {
-        $(this).css("color", "#000");
-    }, function () {
-        $(this).css("color", "#444");
-    }).click(function() {
+    // switch views
+    function switchView(view) {
+        console.log(view);
+        // switching to the selected view should be a noop
+        if ($("#"+view+" > a").hasClass("selected")) return;
+
         // hide everyone
         $("#meat > div").hide();
+        $("#nav > div > a").removeClass("selected");
+        $("#"+view+" > a").addClass("selected");
         // fade in panel selected
-        $("#"+ $(this).attr('id')  +"_meat").fadeIn(300);
+        $("#"+ view  +"_meat").fadeIn(300);
+    }
+
+    // and similarly for site navigation
+    $("#nav > div > a").hover(function() {
+        $(this).addClass("hover");
+    }, function () {
+        $(this).removeClass("hover");
+    }).click(function(e) {
+        switchView($(this).parent().attr('id'));
     });
 
+    // what view should we start off with?  honor hashtags.
+    if (typeof window.location.hash === 'string' &&
+        window.location.hash.length > 1 &&
+        $("#nav > " + window.location.hash).length === 1)
+    {
+        $('#content').show();
+        switchView(window.location.hash.replace(/^#/, ""));
+    } else {
+        $("#splash").fadeIn(700);
+    }
 });
 </script>
 </html>
