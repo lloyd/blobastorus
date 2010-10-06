@@ -1,0 +1,41 @@
+<title> A Simple blobastor.us example </title>
+<style>
+#login { display: none; }
+#howmany { display: none; }
+</style>
+<body>
+<div id="login"><img src="sign-in-with-twitter-d.png" /></div>
+<div id="howmany">
+Hi <span id="user"></span>, you have visited this page <span id="count"></span> times. 
+</div>
+</body>
+<script type="text/javascript" src="../js/jquery-min.js"></script>
+<script type="text/javascript" src="https://blobastor.us/api.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    // set our application scope so that all data will be pulled from this scope
+    Blobastorus.setScope("simpleExample");
+
+    // check logged in state and get the currently logged in user.
+    Blobastorus.getUser(function(user, error) {
+        if (error === 'needsAuth') {
+            $("#login").show();
+            $("#login").click(function() {
+                Blobastorus.redirectUser({
+                    return_to: document.location.href
+                });
+            });
+        } else if (error !== null) {
+            alert("unexpected error occured: " + error);
+        } else {
+            $("#howmany").show();
+            $("#user").text(user);
+            // now let's get the user's blob.  how many times have they logged in?
+            Blobastorus.getBlob(function(data) {
+                console.log(typeof data);
+                Blobastorus.setBlob("0");
+            });
+        }
+    });
+});
+</script>
