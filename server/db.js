@@ -19,9 +19,7 @@ exports.get = function(domain,scope,user,cb) {
     db.collection(domain, function(err, col) {
         col.find({user:user}, {limit:1}, function(err, cur) {
             cur.nextObject(function(e,doc) {
-                console.log("ungh: " + JSON.stringify(doc));
                 var rv = null;
-                console.log(doc.data[scope]);
                 if (doc && doc.data && doc.data[scope]) rv = doc.data[scope];
                 cb(e,rv);
             });
@@ -31,9 +29,6 @@ exports.get = function(domain,scope,user,cb) {
 
 exports.set = function(domain,scope,user,data,cb) {
     if (scope === "") scope = "*";
-    console.log("set, domain: " + domain);
-    console.log("set, scope: " + scope);
-    console.log("set, user: " + user);
     db.collection(domain, function(err, col) {
         col.find({user:user}, {limit:1}, function(err, cur) {
             cur.nextObject(function(e,doc) {
