@@ -45,7 +45,7 @@ a {
 
 .pronounce {
   font-size: .8em;
-  font-family: fixed, 'lucida console', monaco, 'andale mono', 'bitstream vera sans mono', consolas, monospace;
+  font-family: 'lucida console', monaco, 'andale mono', 'bitstream vera sans mono', consolas, monospace;
 }
 
 #content {
@@ -107,6 +107,48 @@ a {
   display:none;
 }
 
+#meat {
+  margin-bottom: 100px;
+}
+
+#example_meat {
+    margin: 30px;
+    font-size: .9em;
+}
+
+#example_launch {
+  padding: 10px;
+  text-align: center;
+}
+
+pre {
+  font-size: .8em;
+}
+
+#docs_meat h3 {
+  font-family: 'lucida console', monaco, 'andale mono', 'bitstream vera sans mono', consolas, monospace;
+  font-size: .9em;
+}
+
+#docs_meat p.funcdoc,dl {
+  margin: 0 20px 10px 20px;
+}
+
+#docs_meat p.warning {
+  color: #f00;
+}
+
+#docs_meat tt {
+  font-family: 'lucida console', monaco, 'andale mono', 'bitstream vera sans mono', consolas, monospace;
+  font-size: .9em;
+}
+
+#docs_meat .param {
+  font-family: 'lucida console', monaco, 'andale mono', 'bitstream vera sans mono', consolas, monospace;
+  font-size: .9em;
+  font-weight: bold;
+}
+
 </style>
 </head>
 <body>
@@ -122,9 +164,10 @@ a {
       <div id="lillogo"></div>
       <div id="title">blobastor.us</div>
       <div id="nav">
-        <div id="data"><a href="#data">DATA</a></div>
-        <div id="tutorial"><a href="#tutorial">TUTORIAL</a></div>
+        <!-- it would be cool to be able to browse data from right here -->
+        <!-- div id="data"><a href="#data">DATA</a></div -->
         <div id="docs"><a href="#docs">DOCS</a></div>
+        <div id="example"><a href="#example">EXAMPLE</a></div>
         <div id="overview"><a href="#overview">OVERVIEW</a></div>
       </div>
     </div>
@@ -132,24 +175,127 @@ a {
       <div id="data_meat">
         check out all the stored data
       </div>
-      <div id="tutorial_meat">
+      <div id="example_meat">
+        <div id="example_launch">
+          <a target="blobastorus_example" href="example/"> run this example in its own tab </a>
+        </div>
+        <script src="http://gist.github.com/613967.js?file=PageCounterAStorUs.html"></script>
       </div>
       <div id="docs_meat">
-        <h2> an example </h2>
+        <h2> including the library </h2>
         <p>
-
+          The first step to using blobastor.us is including the javascript library:
+          <pre>&lt;script type="text/javascript" src="https://blobastor.us/api.js"&gt;&lt;/script&gt;</pre>
         </p>
-        <h2> including </h2>
+        <h2> api </h2>
+
+        <p class="warning">
+          NOTE: This API is in, like, PRE-ALPHA.  That means it will likely change lots and lots.
+        </p>
+
         <p>
-          The first thing you&#39;ll need to do to use blobastorus is to
-          include the javascript library
+          After including the blobastorus javscript library, a top level object will be created which
+          supports the following functions:
+        </p>
+
+        <h3> Blobastorus.setScope(scope); </h3>
+        <p class="funcdoc">
+          Set the "data scope" for all subsequent calls during the current session.  The <span class="param">scope</span> argument
+          must be a string which matches <tt>/[a-zA-Z0-9]+/</tt>.  Scoping data allows you to host
+          multiple applications on the same domain which use blobastor.us without having them collide.
+        </p>
+        <h3> Blobastorus.getUser(callback); </h3>
+        <p class="funcdoc">
+          Get the currently authenticated user.  The callback has arguments
+          <span class="param">(username, error)</span>.  If error is non-null,
+          this indicates the call was a failure.  If no user is currently
+          authenticated error will be the string <tt>"needsAuth"</tt>.  Otherwise
+          the <span class="param">username</span> parameter will contain a string
+          which is the twitter id of the currently authenticated user.
+        </p>
+        <h3> Blobastorus.redirectUser([return_to]); </h3>
+        <p class="funcdoc">
+          Redirect the user to twitter for authentication.
+          Optionally, a <span class="param">return_to</span> parameter
+          may be supplied which is a url that the user will be
+          directed to after authentication is complete.
+        </p>
+        <p class="funcdoc">
+          This function will overwrite <tt>document.location</tt> and hence
+          will not return.  If you would rather do something more snazzy, you can manually send your user to:
+        </p>
+          <pre>        https://blobastor.us/auth/?kickback=http://mysite.com</pre>
+        <p class="funcdoc">
+          The value of kickback is the site that the user should be sent back to once authentication is complete.
+        </p>
+        <h3> Blobastorus.getBlob([args], callback); </h3>
+        <p class="funcdoc">
+          Get a JSON blob.  <span class="param">args</span> is an optional argument which may contain the following
+          properties:
+          <dl>
+            <dt class="param">domain</dt><dd>the domain for which the blob should be fetched, defaults to current domain.</dd>
+            <dt class="param">scope</dt><dd>the 'scope' for which the blob should be fetched, defaults to current scope.</dd>
+            <dt class="param">user</dt><dd>the user for whom the blob should be fetched, defaults to currently authenticated user.</dd>
+          </dl>
+        </p>
+        <p class="funcdoc">
+          The callback has arguments <span class="param">(blob, error)</span>.  when <tt>error</tt> is non-null there was
+          a problem fetching the blob, and error contains a textual error code.  Otherwise, <tt>blob</tt> will contain the fetched data.
+        </p>
+        <h3> Blobastorus.setBlob(blob, [callback]); </h3>
+        <p class="funcdoc">
+          Set the user's blob for the current domain, current scope (see <tt>.setScope()</tt>), and currently authenticated
+          user (see <tt>.getUser()</tt>).
+        </p>
+        <p class="funcdoc">
+          The callback has arguments <span class="param">(error)</span>.  When <tt>error</tt> is non-null there was
+          a problem setting the blob, and <tt>error</tt> contains a textual error code.
+        </p>
+        <h3> Blobastorus.listDomains(callback); </h3>
+        <p class="funcdoc">
+          List all domains for which data is stored.  The callback has arguments
+          <span class="param">(domainArray, error)</span>.  <tt>domainArray</tt> is an
+          array of strings representing domains for where data is stored in blobastor.us.
+          When <tt>error</tt> is non-null this indicates there was a problem acquiring the
+          list of domains and <tt>error</tt> contains a textual error code. 
+        </p>
+        <h3> Blobastorus.listScopes([domain], callback); </h3>
+        <p class="funcdoc">
+          List the available data scopes within a <tt>domain</tt>.  If
+          the <tt>domain</tt> parameter is omitted, defaults to
+          current domain.  The callback has
+          arguments <span class="param">(scopeArray, error)</span>
+          <tt>scopeArray</tt> is an array of strings representing scopes under the specified domain where data
+          is stored in blobastor.us.
+          When <tt>error</tt> is non-null this indicates there was a problem acquiring the
+          list of scopes and <tt>error</tt> contains a textual error code. 
+        </p>
+        <h3> Blobastorus.listUsers([domain], callback); </h3>
+        <p class="funcdoc">
+          List the available data scopes within a <tt>domain</tt>.  If
+          the <tt>domain</tt> parameter is omitted, defaults to
+          current domain.  The callback has
+          arguments <span class="param">(scopeArray, error)</span>
+          <tt>scopeArray</tt> is an array of strings representing scopes under the specified domain where data
+          is stored in blobastor.us.
+          When <tt>error</tt> is non-null this indicates there was a problem acquiring the
+          list of scopes and <tt>error</tt> contains a textual error code. 
+        </p>
+        <h2> error codes </h2>
+        <p>
+          Wherever there's an <span class="param">error</span>
+          argument to a callback, it holds a string error code.  The
+          only error code that's interesting to handle programatically
+          is <tt>needsAuth</tt> which indicates that no user is logged in.
+          The client application should, in this case, call
+          <tt>.redirectUser()</tt>.
         </p>
       </div>
       <div id="overview_meat">
         <p>
           <b>blobastor.us</b> is a free data storage service that is
           optimized for HTML5 web applications.  The service is
-          designed to be interfaced from client javascript code and to
+          designed to be interfaced from javascript in the browser and to
           eliminate the need for a server component for most little HTML5
           apps.  Twitter is used to provide authentication and user identity.
         </p><p>
@@ -179,6 +325,11 @@ a {
           The service comes without any warranty and may change without
           any notice.  But then, if you come to rely on this service, and it
           dies, you can always take the code and build your own blobastor.
+          Roar!
+        </p>
+        <h2> feedback </h2>
+        <p>
+          <a href="http://github.com/lloyd/blobastorus/issues">File a bug</a>?  
         </p>
         <h2> cred </h2> 
         <p>
@@ -186,8 +337,8 @@ a {
           and is a remix of his <a href="http://www.toolness.com/wp/?p=1058">twitblob</a> service.
         </p>
         <p>
-          The name <i>blobastorus</i> was inspired by the
-          Brontosaurus, a creature that never was.
+          The name <i>Blobastorus</i> was inspired by the
+          <i>Brontosaurus</i>, a creature that never was.
         </p>
         <p>
           The mascot image is a remix of a picture taken by flickr user, 
@@ -200,7 +351,7 @@ a {
     </div>
   </div>
 <div id="ccBadge">
-Lloyd&nbsp;Hilaiel<br><a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/us/80x15.png" /></a>
+Lloyd&nbsp;Hilaiel<br><a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="i/cc.png" /></a>
 </div>
 </body>
 <script src="js/jquery-min.js"></script>
@@ -219,7 +370,6 @@ $(document).ready(function() {
 
     // switch views
     function switchView(view) {
-        console.log(view);
         // switching to the selected view should be a noop
         if ($("#"+view+" > a").hasClass("selected")) return;
 
