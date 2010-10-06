@@ -1,18 +1,19 @@
-    <title> PageCounterAStorUs: A Simple blobastor.us example </title>
+<title> PageCounterAStorUs: A Simple blobastor.us example </title>
+
 <style>
 #login { display: none; }
 #howmany { display: none; }
 </style>
+
 <body>
-<h2>PageCounterAStorUs</h2>
-
-<p>A simple blobastorus example that implements a page visit counter.</p>
-
-<div id="login"><img src="sign-in-with-twitter-d.png" /></div>
-<div id="howmany">
-Hi <span id="user"></span>, you have visited this page <span id="count"></span> times. 
-</div>
+  <h2>PageCounterAStorUs</h2>
+  <p>A simple blobastorus example that implements a page visit counter.</p>
+  <div id="login"><img src="sign-in-with-twitter-d.png" /></div>
+  <div id="howmany">
+    Hi <span id="user"></span>, you have visited this page <span id="count"></span> times. 
+  </div>
 </body>
+
 <script type="text/javascript" src="../js/jquery-min.js"></script>
 
 <!-- step 1: load the blobastorus javascript library --> 
@@ -28,10 +29,7 @@ $(document).ready(function() {
         // click on to authenticate via twitter
         if (error === 'needsAuth') {
             $("#login").show();
-            $("#login").click(function() {
-                // redirect the user to 
-                Blobastorus.redirectUser();
-            });
+            $("#login").click(function() { Blobastorus.redirectUser(); });
         }
 
         // step 4: if the user *is* authenticated, welcome them by name
@@ -41,12 +39,10 @@ $(document).ready(function() {
 
             // step 5:  now let's get the user's blob.  how many times have they logged in?
             Blobastorus.getBlob(function(visits) {
-                console.log("getting blob to " + visits) ;
                 visits = (typeof visits !== 'number') ? 1 : (visits + 1);
                 $("#count").text(visits);
 
                 // step 6:  finally, save the user's visit count.
-                console.log("setting blob to " + visits); 
                 Blobastorus.setBlob(visits);
             });
         }
