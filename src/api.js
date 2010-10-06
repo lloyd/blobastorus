@@ -100,9 +100,9 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
                 error: function(e) { cb(e); }
             });
         },
-        redirectUser: function(args) {
+        redirectUser: function(return_to) {
             var url = 'https://blobastor.us/auth/?kickback='; 
-            url += ((args && args.return_to === 'string') ? args.return_to : document.location.href);
+            url += ((return_to === 'string') ? return_to : document.location.href);
             document.location = url;
         },
         // And return a reference to the local copy of our channel.  This trick
