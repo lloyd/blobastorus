@@ -80,7 +80,6 @@ chan.bind("setBlob", function(trans, args) {
 
     r.onreadystatechange = function (e) {
         if (r.readyState == 4) {
-            e.preventDefault();
             if (r.status == 200) {
                 trans.complete(true);
             } else if(r.status === 403) {

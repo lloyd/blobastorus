@@ -402,7 +402,6 @@ $(document).ready(function() {
     }, function () {
         $(this).removeClass("hover");
     }).click(function(e) {
-        console.log("clicked");
         e.preventDefault();
         switchView($(this).parent().attr('id'));
         return false;
