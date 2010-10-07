@@ -164,8 +164,7 @@ pre {
       <div id="lillogo"></div>
       <div id="title">blobastor.us</div>
       <div id="nav">
-        <!-- it would be cool to be able to browse data from right here -->
-        <!-- div id="data"><a href="#data">DATA</a></div -->
+        <div id="data"><a href="#data">DATA</a></div>
         <div id="docs"><a href="#docs">DOCS</a></div>
         <div id="example"><a href="#example">EXAMPLE</a></div>
         <div id="overview"><a href="#overview">OVERVIEW</a></div>
@@ -173,7 +172,12 @@ pre {
     </div>
     <div id="meat">
       <div id="data_meat">
-        check out all the stored data
+        <p>
+          This page provides a simple data explorer which lets you
+          spelunk through data stored on blobastorus.
+          <ul id="dataView">
+          </ul>
+        </p>
       </div>
       <div id="example_meat">
         <div id="example_launch">
@@ -198,12 +202,8 @@ pre {
           supports the following functions:
         </p>
 
-        <h3> Blobastorus.setScope(scope); </h3>
-        <p class="funcdoc">
-          Set the "data scope" for all subsequent calls during the current session.  The <span class="param">scope</span> argument
-          must be a string which matches <tt>/[a-zA-Z0-9]+/</tt>.  Scoping data allows you to host
-          multiple applications on the same domain which use blobastor.us without having them collide.
-        </p>
+        <h2> basic functions </h2> 
+
         <h3> Blobastorus.getUser(callback); </h3>
         <p class="funcdoc">
           Get the currently authenticated user.  The callback has arguments
@@ -244,13 +244,30 @@ pre {
         </p>
         <h3> Blobastorus.setBlob(blob, [callback]); </h3>
         <p class="funcdoc">
-          Set the user's blob for the current domain, current scope (see <tt>.setScope()</tt>), and currently authenticated
+          Set the user&#39;s blob for the current domain, current scope (see <tt>.setScope()</tt>), and currently authenticated
           user (see <tt>.getUser()</tt>).
         </p>
         <p class="funcdoc">
           The callback has arguments <span class="param">(error)</span>.  When <tt>error</tt> is non-null there was
           a problem setting the blob, and <tt>error</tt> contains a textual error code.
         </p>
+
+        <h3> Blobastorus.listUsers([domain], [scope], callback); </h3>
+        <p class="funcdoc">
+          List users who have stored blobs.  Defaults will be current <tt>domain</tt> and <tt>scope</tt>.
+          If a single argument is supplied it will be interpreted as a <tt>scope</tt> (not a <tt>domain</tt>).
+        </p>
+
+        <h2> data scoping </h2>
+        <h3> Blobastorus.setScope(scope); </h3>
+        <p class="funcdoc">
+          Set the "data scope" for all subsequent calls during the current session.  The <span class="param">scope</span> argument
+          must be a string which matches <tt>/[a-zA-Z0-9]+/</tt>.  Scoping data allows you to host
+          multiple applications on the same domain which use blobastor.us without having them collide.
+        </p>
+
+        <h2> exploration </h2>
+
         <h3> Blobastorus.listDomains(callback); </h3>
         <p class="funcdoc">
           List all domains for which data is stored.  The callback has arguments
@@ -260,17 +277,6 @@ pre {
           list of domains and <tt>error</tt> contains a textual error code. 
         </p>
         <h3> Blobastorus.listScopes([domain], callback); </h3>
-        <p class="funcdoc">
-          List the available data scopes within a <tt>domain</tt>.  If
-          the <tt>domain</tt> parameter is omitted, defaults to
-          current domain.  The callback has
-          arguments <span class="param">(scopeArray, error)</span>
-          <tt>scopeArray</tt> is an array of strings representing scopes under the specified domain where data
-          is stored in blobastor.us.
-          When <tt>error</tt> is non-null this indicates there was a problem acquiring the
-          list of scopes and <tt>error</tt> contains a textual error code. 
-        </p>
-        <h3> Blobastorus.listUsers([domain], callback); </h3>
         <p class="funcdoc">
           List the available data scopes within a <tt>domain</tt>.  If
           the <tt>domain</tt> parameter is omitted, defaults to
@@ -355,6 +361,9 @@ Lloyd&nbsp;Hilaiel<br><a rel="license" href="http://creativecommons.org/licenses
 </div>
 </body>
 <script src="js/jquery-min.js"></script>
+<script src="js/jquery.treeview.js"></script> 
+<script src="https://blobastor.us/api.js"></script> 
+
 <script>
 $(document).ready(function() {
     // click on the definition to enter the site
@@ -400,6 +409,61 @@ $(document).ready(function() {
     } else {
         $("#splash").fadeIn(700);
     }
+
+    // the data view
+    Blobastorus.listDomains(function(domains) {
+        for ( var i in domains ) {
+            var d = $("<li>" + domains[i] + "</li>");
+            $("#dataView").append(d);
+            d.click((function() {
+                var _domain = domains[i];
+                return function() {
+                    var node = $(this);
+                    $(this).unbind('click');
+                    console.log("expanding " + _domain);
+                    Blobastorus.listScopes(_domain, function(scopes) {
+                        var n = $("<ul/>")
+                        for (var i = 0 ; i < scopes.length; i++) {
+                            var disp_scope = (scopes[i] === '' ? '&lt;default scope&gt;' : scopes[i]);
+                            var d = $("<li>" + disp_scope + "</li>");
+                            n.append(d);
+                            d.click((function() {
+                                var _scope = scopes[i];
+                                return function() {
+                                    var node = $(this);
+                                    $(this).unbind('click');
+                                    console.log("expanding " + _domain + "|" + _scope);
+                                    Blobastorus.listUsers(_domain, _scope, function(users) {
+                                        var n = $("<ul/>")
+                                        for (var i = 0 ; i < users.length; i++) {
+                                            var d = $("<li>" + users[i] + "</li>");
+                                            n.append(d);
+                                            n.click((function() {
+                                                var _user = users[i];
+                                                return function() {
+                                                    Blobastorus.getBlob({
+                                                        domain: _domain,
+                                                        scope: _scope,
+                                                        user: _user
+                                                    }, function(b) {
+                                                        console.log(JSON.stringify(b));
+                                                    });
+                                                };
+                                            })());
+                                        }
+                                        node.append(n);
+                                    });
+
+
+                                };
+                            })());
+                        }
+                        node.append(n);
+                    });
+                }
+            })());
+         }
+    });
 });
 </script>
 </html>

@@ -112,6 +112,47 @@ apps.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
     });
 });
 
+// API to list domains where data is available
+apps.get(/^\/api\/domains$/, function(req, res){
+    // list users with blobs stored for given domain (req.params[0])
+    db.domains(function(domains) {
+        res.send(domains);
+    });
+});
+
+// API list data scopes within a domain
+apps.get(/^\/api\/scopes\/([-0-9a-zA-Z.:]+)$/, function(req, res){
+    var domain = req.params[0];
+
+    if (!validDomain(domain)) {
+        res.send(400);
+        return;
+    }
+
+    // get the blob associated with the domain (req.params[0]) and
+    // (user req.params[2]) requested.
+    db.scopes(domain, function(scopes) {
+        res.send(scopes);
+    });
+});
+
+// API list users who have data stored for a given domain and scope
+apps.get(/^\/api\/users\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)$/, function(req, res){
+    var domain = req.params[0];
+    var scope = req.params[1];
+
+    if (!validDomain(domain)) {
+        res.send(400);
+        return;
+    }
+
+    // get the blob associated with the domain (req.params[0]) and
+    // (user req.params[2]) requested.
+    db.users(domain, scope, function(users) {
+        res.send(users);
+    });
+});
+
 // Begin twitter authentication (application redirects user here)
 apps.get("/auth/", function (req, res) {
     var kickback = req.query.kickback;

@@ -55,7 +55,6 @@ chan.bind("setBlob", function(trans, args) {
     var scope = "";
     var data = undefined; // undefined is different than null
     if (typeof args.scope !== 'string' ) throw [ "protocolError", "missing required scope argument" ];
-    console.log("your momma");
     scope = args.scope;
     if (args.data) data = args.data;
 
@@ -66,7 +65,6 @@ chan.bind("setBlob", function(trans, args) {
         sto.clear();
         throw [ "needsAuth", "Client application must authenticate the user" ];
     }
-
 
     // we will be async
     trans.delayReturn(true);
@@ -96,7 +94,6 @@ chan.bind("setBlob", function(trans, args) {
 });
 
 chan.bind("user", function(trans, args) {
-    console.log("user called");
     // if the user's twitter username, secret, and ts are in local storage,
     // they are logged in
 
@@ -117,6 +114,71 @@ chan.bind("user", function(trans, args) {
     } else {
         throw [ "needsAuth", "authentication required, no user is logged in." ];
     }
+});
+
+chan.bind("listDomains", function(trans, args) {
+    // we will be async
+    trans.delayReturn(true);
+
+    var r = new XHR();
+    r.open('GET', "/api/domains", true);
+    r.onreadystatechange = function (e) { 
+        if (r.readyState == 4) {
+            if (r.status == 200) {
+                trans.complete(JSON.parse(r.responseText));
+            } else if (r.status == 404) {
+                trans.complete(null);
+            } else {
+                trans.error("networkError", "Error loading page\n");
+            }
+        }
+    };
+    r.send(null);
+});
+
+chan.bind("listScopes", function(trans, args) {
+    // we will be async
+    trans.delayReturn(true);
+
+    var domain = cleanOrigin((typeof args === 'string') ? args : trans.origin);
+
+    var r = new XHR();
+    r.open('GET', "/api/scopes/" + domain, true);
+    r.onreadystatechange = function (e) { 
+        if (r.readyState == 4) {
+            if (r.status == 200) {
+                trans.complete(JSON.parse(r.responseText));
+            } else if (r.status == 404) {
+                trans.complete(null);
+            } else {
+                trans.error("networkError", "Error loading page\n");
+            }
+        }
+    };
+    r.send(null);
+});
+
+chan.bind("listUsers", function(trans, args) {
+    // we will be async
+    trans.delayReturn(true);
+
+    var domain = cleanOrigin((typeof args.domain === 'string') ? args.domain : trans.origin);
+    var scope = args.scope;
+
+    var r = new XHR();
+    r.open('GET', "/api/users/" + domain + "/" + scope, true);
+    r.onreadystatechange = function (e) { 
+        if (r.readyState == 4) {
+            if (r.status == 200) {
+                trans.complete(JSON.parse(r.responseText));
+            } else if (r.status == 404) {
+                trans.complete(null);
+            } else {
+                trans.error("networkError", "Error loading page\n");
+            }
+        }
+    };
+    r.send(null);
 });
 
 </script>

@@ -6,6 +6,10 @@ var mongo = require('mongodb');
 var host = "127.0.0.1", port = 27017;
 var db = new mongo.Db('blobastorus', new mongo.Server(host, port, {auto_reconnect: true}),{native_parser:true});
 
+function validDomain(d) {
+    return (d != 'users' && d != 'auth' && d != 'system.indexes' && !d.match(/^\$/));
+}
+
 // XXX: what if open fails?
 exports.open = function(cb) {
     db.open(function() {
@@ -62,6 +66,62 @@ exports.list = function(domain,cb) {
         });
     });
 };
+
+exports.domains = function(cb) {
+    db.collectionNames(function(err, arr) {
+        var rv = [];
+        for (var i in arr) {
+            var cn = arr[i].name.replace(/^blobastorus./,"");
+            if (validDomain(cn)) rv.push(cn);
+        }
+        cb(rv);
+    });
+};
+
+exports.scopes = function(domain, cb) {
+    // XXX: horribly inefficient
+    db.collection(domain, function(err, col) {
+        col.find({}, {}, function(err, cur) {
+            var scopes = { };
+            cur.each(function(e,doc) {
+                if (doc) {
+                    for (var i in doc.data) {
+                        scopes[i] = true;
+                    }
+                } else {
+                    var scopesArr = [ ];
+                    for (var j in scopes) {
+                        if (j === '*') j = "";
+                        scopesArr.push(j);
+                    }
+                    cb(scopesArr);
+                }
+            });
+        });
+    });
+};
+
+exports.users = function(domain, scope, cb) {
+    if (scope === "") scope = "*";
+    db.collection(domain, function(err, col) {
+        // XXX need a good, efficient selector here!
+        // data: { scope: { $exists : true } }???
+        col.find({ }, { }, function(err, cur) {
+            var users = { };
+            cur.each(function(e,doc) {
+                if (doc && (!doc.data || !doc.data[scope])) return;
+                if (doc === null) {
+                    var usersArr = [ ];
+                    for (var i in users) usersArr.push(i);
+                    cb(usersArr);
+                } else {
+                    users[doc.user] = true;
+                }
+            });
+        });
+    });
+};
+
 
 exports.getUserSecrets = function(user, cb) {
     db.collection("users", function(err, col) {

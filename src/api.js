@@ -66,7 +66,6 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
             scope = s;
         },
         getUser: function(cb) {
-            console.log("getUser called");
             getChan().call({
                 method: "user",
                 success: function(v) { cb(v, null); },
@@ -104,6 +103,45 @@ return false;},bind:function(method,cb){if(!method||typeof method!=='string')thr
             var url = 'https://blobastor.us/auth/?kickback='; 
             url += ((return_to === 'string') ? return_to : document.location.href);
             document.location = url;
+        },
+        listDomains: function(cb) {
+            if (typeof cb !== 'function') throw "function 'callback' argument missing!";
+            getChan().call({
+                method: "listDomains",
+                success: function(v) { cb(v,null); },
+                error: function(e) { cb(null,e); }
+            });
+        },
+        listScopes: function(d, cb) {
+            if (typeof d === 'function') { cb = d; d = null; }
+            getChan().call({
+                method: "listScopes",
+                params: d,
+                success: function(v) { cb(v,null); },
+                error: function(e) { cb(null,e); }
+            });
+        },
+        listUsers: function(domain, scope, cb) {
+            var p = {
+                domain: null,
+                scope: scope
+            };
+            if (typeof domain === 'function') {
+                cb = domain;
+            } else if (typeof scope === 'function') {
+                p.scope = domain;
+                cb = scope;
+            } else {
+                p.domain = domain;
+                p.scope = scope;
+            }
+            if (typeof d === 'function') { cb = d; d = null; }
+            getChan().call({
+                method: "listUsers",
+                params: p,
+                success: function(v) { cb(v,null); },
+                error: function(e) { cb(null,e); }
+            });
         },
         // And return a reference to the local copy of our channel.  This trick
         // allows the same javascript file to be used on either side of the channel,
