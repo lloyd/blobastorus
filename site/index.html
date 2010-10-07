@@ -17,12 +17,12 @@ body {
   font-family: Baskerville, Georgia, serif;
   font-size: 12pt;
   color: #444;
+  text-align: center;
 }
 
 #splash {
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 150px;
+  text-align: left;
+  margin: 150px auto;
   width: 600px;
   height:283px;
   border: 1px solid white;
@@ -49,6 +49,7 @@ a {
 }
 
 #content {
+  text-align: left;
   width:800px;
   margin: 0 auto;
   display:none;
@@ -86,7 +87,7 @@ a {
   left: 225px;
 }
 
-#nav > div {
+#nav div {
   float: right;
   margin-right: 60px;
 }
@@ -387,7 +388,11 @@ $(document).ready(function() {
         $("#nav > div > a").removeClass("selected");
         $("#"+view+" > a").addClass("selected");
         // fade in panel selected
-        $("#"+ view  +"_meat").fadeIn(300);
+        $("#"+ view  +"_meat").show();
+
+        var scrollmem = $('body').scrollTop();
+        window.location.hash = view;
+        $('html,body').scrollTop(scrollmem)
     }
 
     // and similarly for site navigation
@@ -396,7 +401,10 @@ $(document).ready(function() {
     }, function () {
         $(this).removeClass("hover");
     }).click(function(e) {
+        console.log("clicked");
+        e.preventDefault();
         switchView($(this).parent().attr('id'));
+        return false;
     });
 
     // what view should we start off with?  honor hashtags.
