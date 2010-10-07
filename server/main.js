@@ -35,6 +35,11 @@ function validDomain(domain) {
     return (typeof domain === 'string' && domain.length > 0 && domain !== 'users');
 }
 
+function setJSONResponseHeaders(res) {
+    res.header('Cache-Control', 'no-cache');
+    res.contentType("application/json");
+}
+
 // API to get a blob
 apps.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)\/([^\/]+)$/, function(req, res){
     var domain = req.params[0];
@@ -49,7 +54,12 @@ apps.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)\/([^\/]+)$/, function(req
     // get the blob associated with the domain (req.params[0]) and
     // (user req.params[2]) requested.
     db.get(domain, scope, user, function(e,doc) {
-        res.send(doc ? JSON.stringify(doc) : 404);
+        if (doc) {
+            setJSONResponseHeaders(res);
+            res.send(JSON.stringify(doc));
+	} else {
+	    res.send(404);
+	}
     });
 });
 
@@ -117,6 +127,7 @@ apps.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
     // list users with blobs stored for given domain (req.params[0])
     db.list(domain, function(users) {
         // XXX: error handling!
+        setJSONResponseHeaders(res);
         res.send(users);
     });
 });
@@ -125,6 +136,7 @@ apps.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
 apps.get(/^\/api\/domains$/, function(req, res){
     // list users with blobs stored for given domain (req.params[0])
     db.domains(function(domains) {
+        setJSONResponseHeaders(res);
         res.send(domains);
     });
 });
@@ -141,6 +153,7 @@ apps.get(/^\/api\/scopes\/([-0-9a-zA-Z.:]+)$/, function(req, res){
     // get the blob associated with the domain (req.params[0]) and
     // (user req.params[2]) requested.
     db.scopes(domain, function(scopes) {
+        setJSONResponseHeaders(res);
         res.send(scopes);
     });
 });
@@ -158,6 +171,7 @@ apps.get(/^\/api\/users\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)$/, function(req, res){
     // get the blob associated with the domain (req.params[0]) and
     // (user req.params[2]) requested.
     db.users(domain, scope, function(users) {
+        setJSONResponseHeaders(res);
         res.send(users);
     });
 });
