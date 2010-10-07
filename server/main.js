@@ -53,10 +53,19 @@ apps.get(/^\/api\/get\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)\/([^\/]+)$/, function(req
     });
 });
 
+const POST_LIMIT = (1024 * 20);
+
 // API to set a blob
 // XXX: oh yeah, alternatively the client could sign their request
 // with the secret and we could reduce the amount of HTTPSery going on.
 apps.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)\/([^\/]+)$/, function(req, res){
+    // disallow posts of greater than 20k
+    // XXX: should this happen earlier in the processing stack?  just slam connections
+    // closed if we read a header or body of more than 20k?
+    if (req.body.data && req.body.data.length > POST_LIMIT) {
+        res.send("blobastor.us doesn't accepts blobs larger than " + POST_LIMIT + " bytes", 413);
+        return;
+    }
     // req.params[0] is domain
     // req.params[1] is data scope
     // req.params[2] is twitter username
