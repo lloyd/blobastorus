@@ -27,7 +27,7 @@ var chan = Blobastorus.chan.build({
 chan.bind("getBlob", function(trans, args) {
     if (typeof args !== 'object') args = { };
 
-    var user = sto.getItem("user");
+    var user = (args.user ? args.user : sto.getItem("user"));
     var scope = (args.scope ? args.scope : "");
     var origin = cleanOrigin(args.origin ? args.origin : trans.origin);
 
