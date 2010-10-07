@@ -362,7 +362,7 @@ Lloyd&nbsp;Hilaiel<br><a rel="license" href="http://creativecommons.org/licenses
 </div>
 </body>
 <script src="js/jquery-min.js"></script>
-<script src="js/jquery.treeview.js"></script> 
+<script src="js/jquery.qtip-min.js"></script> 
 <script src="https://blobastor.us/api.js"></script> 
 
 <script>
@@ -418,6 +418,31 @@ $(document).ready(function() {
         $("#splash").fadeIn(700);
     }
 
+    function addToolTip(node, domain, scope, user) {
+        node.qtip({
+            content: 'Fetching blob...',
+            style: {
+                name: 'red',
+                tip: 'leftMiddle'
+            },
+            position: {
+                corner: {
+                    target: 'rightMiddle',
+                    tooltip: 'leftMiddle'
+                }
+            },
+            api: {
+                onRender: function()
+                {
+                    var self = this;
+                    Blobastorus.getBlob({ domain: domain, scope: scope, user: user }, function(v) {
+                        self.updateContent(JSON.stringify(v, null, 4));
+                    });
+                }
+            }
+        });
+    }
+
     // the data view
     Blobastorus.listDomains(function(domains) {
         for ( var i in domains ) {
@@ -428,10 +453,9 @@ $(document).ready(function() {
                 return function() {
                     var node = $(this);
                     $(this).unbind('click');
-                    console.log("expanding " + _domain);
                     Blobastorus.listScopes(_domain, function(scopes) {
                         var n = $("<ul/>")
-                        for (var i = 0 ; i < scopes.length; i++) {
+                        for (var i = 0 ; scopes && i < scopes.length; i++) {
                             var disp_scope = (scopes[i] === '' ? '&lt;default scope&gt;' : scopes[i]);
                             var d = $("<li>" + disp_scope + "</li>");
                             n.append(d);
@@ -440,26 +464,15 @@ $(document).ready(function() {
                                 return function() {
                                     var node = $(this);
                                     $(this).unbind('click');
-                                    console.log("expanding " + _domain + "|" + _scope);
                                     Blobastorus.listUsers(_domain, _scope, function(users) {
                                         var n = $("<ul/>")
-                                        for (var i = 0 ; i < users.length; i++) {
-                                            var d = $("<li>" + users[i] + "</li>");
-                                            n.append(d);
-                                            n.click((function() {
-                                                var _user = users[i];
-                                                return function() {
-                                                    Blobastorus.getBlob({
-                                                        domain: _domain,
-                                                        scope: _scope,
-                                                        user: _user
-                                                    }, function(b) {
-                                                        console.log(JSON.stringify(b));
-                                                    });
-                                                };
-                                            })());
-                                        }
                                         node.append(n);
+                                        for (var i = 0 ; users && i < users.length; i++) {
+                                            var content = $("<span/>").text(users[i]);
+                                            var d = $("<li/>").append(content);
+                                            n.append(d);
+                                            addToolTip(content, _domain, _scope, users[i]);
+                                        }
                                     });
 
 
