@@ -114,24 +114,6 @@ apps.post(/^\/api\/set\/([-0-9a-zA-Z.:]+)\/([a-zA-Z_]*)\/([^\/]+)$/, function(re
     });
 });
 
-// API to list users who have stored blobs for a given domain
-// XXX: no, this wouldn't really scale.
-apps.get(/^\/api\/list\/([-0-9a-zA-Z.:]+)$/, function(req, res){
-    var domain = req.params[0];
-
-    if (!validDomain(domain)) {
-        res.send(400);
-        return;
-    }
-
-    // list users with blobs stored for given domain (req.params[0])
-    db.list(domain, function(users) {
-        // XXX: error handling!
-        setJSONResponseHeaders(res);
-        res.send(users);
-    });
-});
-
 // API to list domains where data is available
 apps.get(/^\/api\/domains$/, function(req, res){
     // list users with blobs stored for given domain (req.params[0])
