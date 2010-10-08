@@ -104,12 +104,11 @@ exports.scopes = function(domain, cb) {
 exports.users = function(domain, scope, cb) {
     if (scope === "") scope = "*";
     db.collection(domain, function(err, col) {
-        // XXX need a good, efficient selector here!
-        // data: { scope: { $exists : true } }???
-        col.find({ }, { }, function(err, cur) {
+        var search = {};
+        search["data." + scope] = { '$exists' : true };
+        col.find(search, { 'user': 1 }, function(err, cur) {
             var users = { };
             cur.each(function(e,doc) {
-                if (doc && (!doc.data || !doc.data[scope])) return;
                 if (doc === null) {
                     var usersArr = [ ];
                     for (var i in users) usersArr.push(i);
