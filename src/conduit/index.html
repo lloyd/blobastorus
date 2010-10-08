@@ -29,7 +29,7 @@ chan.bind("getBlob", function(trans, args) {
 
     var user = (args.user ? args.user : sto.getItem("user"));
     var scope = (args.scope ? args.scope : "");
-    var origin = cleanOrigin(args.origin ? args.origin : trans.origin);
+    var origin = cleanOrigin(args.domain ? args.domain : trans.origin);
 
     // we will be async
     trans.delayReturn(true);
