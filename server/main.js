@@ -203,14 +203,6 @@ apps.get("/auth/callback", function (req, res) {
     });
 });
 
-const fs = require("fs"),
-      crypto = require('crypto');
-var privateKey = fs.readFileSync('privatekey.pem').toString();
-var certificate = fs.readFileSync('certificate.pem').toString();
-var credentials = crypto.createCredentials({key: privateKey, cert: certificate});
-
-apps.setSecure(credentials);
-
 // open a connection to the databse, upon success we'll bind our webserver
 db.open(function() {
     app.listen(cfg.port, cfg.ip_to_bind);
