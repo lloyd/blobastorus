@@ -4,7 +4,7 @@
 
 var mongo = require('mongodb');
 var host = "127.0.0.1", port = 27017;
-var db = new mongo.Db('blobastorus', new mongo.Server(host, port, {auto_reconnect: true}),{native_parser:true});
+var db = new mongo.Db('blobastorus', new mongo.Server(host, port, {auto_reconnect: true}),{});
 
 function validDomain(d) {
     return (d != 'users' && d != 'auth' && d != 'system.indexes' && !d.match(/^\$/));
