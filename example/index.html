@@ -1,71 +1,51 @@
-<html>
-<head>
-  <title> A Simple blobastor.us example </title>
-  <script type="text/javascript" src="jquery-min.js"></script>
-</head>
+<title> PageCounterAStorUs: A Simple blobastor.us example </title>
+
+<style>
+#login { display: none; }
+#howmany { display: none; }
+</style>
+
 <body>
-  <p>This page stores data for you in the cloud.</p>
-
-
-  <div id="switch">
-    <div class="logged-out">
-    To use this application: <br/>
-    <div id="signInWithTwitter"><img src="sign-in-with-twitter-d.png" /></div>
-    </div>
-    <div class="logged-in">
-    <p>Hi <span id="username"></span>, here's what you've got stored:</p>
-
-      <textarea id="stored">...</textarea><br>
-      <button id="save">save</button>
-    </div>
+  <h2>PageCounterAStorUs</h2>
+  <p>A simple blobastorus example that implements a page visit counter.</p>
+  <div id="login"><img src="sign_in_blue.png" /></div>
+  <div id="howmany">
+    Hi <span id="user"></span>, you have visited this page <span id="count"></span> times. 
   </div>
-
 </body>
+
+<script type="text/javascript" src="jquery-min.js"></script>
+
+<!-- step 1: load the blobastorus javascript library --> 
 <script type="text/javascript" src="https://blobastor.us/api.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function() {
-    $(".logged-in").hide();
-    $(".logged-out").hide();
 
-    function checkLoginState() {
-        Blobastorus.isLoggedIn(document.location.href, function(redirectUrl, user) {
-            if (redirectUrl) {
-                $(".logged-in").hide();
-                $(".logged-out").show();
-                $("#signInWithTwitter").click(function() {
-                    document.location = redirectUrl;
-                });
-            } else {
-                $("#username").text(user);
-                $(".logged-in").show();
-                $(".logged-out").hide();
-            }
-        });
-    }
+    // step 2: check logged in state and get the currently logged in user.
+    Blobastorus.getUser(function(user, error) {
 
-    $("#save").click(function() {
-        $("#stored").css("opacity", .10);
-        Blobastorus.set($.trim($("#stored").val()), function(err, v) {
-            if (err === "needsAuth") {
-                checkLoginState();
-            } else {
-                $("#stored").animate({ opacity: 1.0 }, 800);
-            }
-        });
-    });
+        // step 3: if the user is not authenticated, show them a button they can
+        // click on to authenticate via twitter
+        if (error === 'needsAuth') {
+            $("#login").show();
+            $("#login").click(function() { Blobastorus.redirectUser(); });
+        }
 
-    Blobastorus.get(function(err, v) {
-        if (err) {
-            if (err === "needsAuth") checkLoginState();
-        } else {
-            if (v === null) v = "";
-            if (typeof v === 'string') {
-                $("#stored").val(v);
-            }
+        // step 4: if the user *is* authenticated, welcome them by name
+        else {
+            $("#howmany").show();
+            $("#user").text(user);
+
+            // step 5:  now let's get the user's blob.  how many times have they logged in?
+            Blobastorus.getBlob(function(visits) {
+                visits = (typeof visits !== 'number') ? 1 : (visits + 1);
+                $("#count").text(visits);
+
+                // step 6:  finally, save the user's visit count.
+                Blobastorus.setBlob(visits);
+            });
         }
     });
-
-    checkLoginState();
 });
 </script>
-</html>

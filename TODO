@@ -1,4 +1,6 @@
-* logging support?
+* logging support? - use winston!
+* use browserid instead of twitter auth
+* local dev harness
 * https is currently required for every transaction.  That sucks, but if we wanted to only use it for moving secrets to the client
   then we would need to solve the following two problems:
   + secure the set api with some kind of signature nonce or challenge/response
