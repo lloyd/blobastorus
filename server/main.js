@@ -6,13 +6,18 @@ db = require('./db.js'),
 secrets = require('./secrets.js'),
 path = require('path'),
 express = require('express'),
-winston = require('winston');
+winston = require('winston'),
+postprocess = require('postprocess');
 
 var app = require('express').createServer();
 
 // set up logging
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, { colorize: true, format: 'dev' });
+
+// in local deployments, contains the local url that should be substituted for
+// https://blobastor.us
+var local_url;
 
 // true all files in ../src statically
 app.configure(function() {
@@ -24,6 +29,15 @@ app.configure(function() {
       }
     }
   }));
+
+  // for local development we'll install a substitution middleware
+  if (process.env.NODE_ENV !== 'production') {
+    app.use(postprocess.middleware(function(body) {
+      return body.toString().replace(new RegExp("https://blobastor.us", 'g'), local_url);
+    }));
+    console.log("substitution middleware for local development installed");
+  }
+
   app.use(express.static(path.join(__dirname, "..", "site")));
   app.use(express.static(path.join(__dirname, "..", "src")));
   app.use(express.bodyParser());
@@ -170,6 +184,7 @@ app.post("/api/verify", function (req, res) {
 // open a connection to the databse, upon success we'll bind our webserver
 db.open(function() {
   app.listen(process.env.PORT || 3000, function() {
-    console.log("bound to " + app.address().port);
+    local_url = "http://127.0.0.1:" + app.address().port;
+    console.log("bound to " + local_url);
   });
 });
